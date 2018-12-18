@@ -91,7 +91,7 @@ class SchedulerImpl
         if (cor == NULL || cor->status == CO_RUNNING)
             return 0;
 
-        if (running_ == -1 && cor->status == CO_FINISHED)
+        if ((-1 == running_) && (CO_FINISHED == cor->status))
             DestroyCoroutine(id);
 
         switch (cor->status)
