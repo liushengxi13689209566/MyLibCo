@@ -5,7 +5,7 @@
 #include <iostream>
 using namespace std;
 
-std::shared_ptr<CoroutineScheduler> sched = NULL;
+CoroutineScheduler *sched = NULL;
 
 void func1(void *arg)
 {
@@ -19,6 +19,7 @@ void func1(void *arg)
 }
 void func2(void *arg)
 {
+
     int test = *(int *)arg;
     cout << "function2  now run " << test << endl;
     sched->Yield();
@@ -26,11 +27,11 @@ void func2(void *arg)
 }
 int main(void)
 {
-    sched = std::make_shared<CoroutineScheduler>();
+    sched = new CoroutineScheduler();
 
     bool stop = false;
-    int f1 = sched->CreateCoroutine(std::bind(func1, reinterpret_cast<void *>(111)));
-    int f2 = sched->CreateCoroutine(std::bind(func2, reinterpret_cast<void *>(222)));
+    int f1 = sched->CreateCoroutine(func1, (void *)111);
+    int f2 = sched->CreateCoroutine(func2, (void *)222);
     while (!stop)
     {
         stop = true;
@@ -47,5 +48,6 @@ int main(void)
             cout << "func2  yeiled " << endl;
         }
     }
+    delete sched;
     return 0;
 }

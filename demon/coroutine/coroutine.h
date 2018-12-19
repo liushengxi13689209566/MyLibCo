@@ -4,10 +4,13 @@
 #include <stdint.h>
 #include <map>
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include <ucontext.h>
 
 typedef void (*CoFunc)(void *arg);
+const int STACK_SIZE = (1024 * 1024);
+const int DEFAULT_COROUTINE = 16;
 
 enum Status
 {
@@ -17,83 +20,54 @@ enum Status
     CO_FINISHED
 };
 
-struct coroutine
+class Coroutine
 {
+  public:
     void *arg;
+    CoFunc func;
 
     int status;
     ucontext_t cxt;
-    CoFunc func;
-
-    char stack[1024];
+    char *stack;
 };
 
-class SchedulerImpl
+class CoroutineScheduler
 {
   public:
-    explicit SchedulerImpl(int stacksize) : index_(0), running_(-1), stacksize_(stacksize) {}
-    ~SchedulerImpl()
-    {
-        std::map<int, coroutine *>::iterator it = id2routine_.begin();
+  public:
+    explicit CoroutineScheduler(void) : running_(-1), index_(0) {}
+    ~CoroutineScheduler() {}
 
-        while (it != id2routine_.end())
-        {
-            if (it->second)
-                free(it->second);
-        }
-    }
-
-    int CreateCoroutine(CoFunc func, void *arg)
-    {
-        coroutine *cor = (coroutine *)malloc(sizeof(coroutine) + stacksize_);
-
-        if (cor == NULL)
-            return -1;
-
-        cor->arg = arg;
-        cor->func = func;
-        cor->status = CO_READY;
-
-        int index = index_++;
-        id2routine_[index] = cor;
-
-        return index;
-    }
     int DestroyCoroutine(int id)
     {
-        coroutine *cor = id2routine_[id];
-        if (!cor)
-            return -1;
+        return impl_->DestroyCoroutine(id);
+    }
+    int CreateCoroutine(CoFunc func, void *arg) //完成
+    {
 
-        free(cor);
-        id2routine_.erase(id);
-        return id;
+        class Coroutine *co = new Coroutine();
+        co->func = func;
+        co->arg = arg;
+        co->status = CO_READY;
+        co->stack = NULL;
+
+        int index = index_++;
+        mmap_[index] = co;
+        return index;
     }
 
     int Yield()
     {
-        if (running_ < 0)
-            return -1;
-
-        int cur = running_;
-        running_ = -1;
-
-        coroutine *cor = id2routine_[cur];
-
-        cor->status = CO_SUSPENDED;
-
-        swapcontext(&cor->cxt, &mainContext_);
-        return 0;
+        return impl_->Yield();
     }
-    int ResumeCoroutine(int id, int y)
+    void ResumeCoroutine(int id)
     {
-        coroutine *cor = id2routine_[id];
-        if (cor == NULL || cor->status == CO_RUNNING)
-            return 0;
+        assert(-1 == running_); //当前没有运行的协程
+        assert(id >= 0);
 
-        if ((-1 == running_) && (CO_FINISHED == cor->status))
-            DestroyCoroutine(id);
-
+        Coroutine *cor = mmap_[id];
+        if (NULL == cor || CO_RUNNING == cor->status)
+            return;
         switch (cor->status)
         {
         case CO_READY:
@@ -101,97 +75,35 @@ class SchedulerImpl
             getcontext(&cor->cxt);
 
             cor->status = CO_RUNNING;
+            // cor->cxt.uc_stack.ss_sp = cor->stack;
             cor->cxt.uc_stack.ss_sp = cor->stack;
-            cor->cxt.uc_stack.ss_size = stacksize_;
+            cor->cxt.uc_stack.ss_size = STACK_SIZE;
             // sucessor context.
-            cor->cxt.uc_link = &mainContext_;
+            cor->cxt.uc_link = &ctx_main_;
 
             running_ = id;
             // setup coroutine context
             makecontext(&cor->cxt, (void (*)())Schedule, 1, this);
-            swapcontext(&mainContext_, &cor->cxt);
+            swapcontext(&ctx_main_, &cor->cxt);
         }
         break;
-        case CO_SUSPENDED:
+        case CO_SUSPENDED: /*待填充*/
         {
-            running_ = id;
-            cor->status = CO_RUNNING;
-            swapcontext(&mainContext_, &cor->cxt);
+            // running_ = id;
+            // cor->status = CO_RUNNING;
+            // swapcontext(&mainContext_, &cor->cxt);
         }
         break;
         }
-
-        return y;
     }
 
-    bool IsCoroutineAlive(int id) const
+    bool IsAlive(int id) const //完成
     {
-        std::map<int, coroutine *>::const_iterator it = id2routine_.find(id);
-        if (it == id2routine_.end())
+        std::map<int, Coroutine *>::const_iterator it = mmap_.find(id);
+        if (it == mmap_.end())
             return false;
-
-        return it->second;
-    }
-
-  private:
-    SchedulerImpl(const SchedulerImpl &);
-    SchedulerImpl &operator=(const SchedulerImpl &);
-
-    static void Schedule(void *arg)
-    {
-        assert(arg);
-        SchedulerImpl *sched = (SchedulerImpl *)arg;
-
-        int running = sched->running_;
-
-        coroutine *cor = sched->id2routine_[running];
-        assert(cor);
-
-        sched->running_ = -1;
-        cor->status = CO_FINISHED;
-    }
-
-  private:
-    int index_;
-    int running_;
-    const int stacksize_;
-
-    ucontext_t mainContext_;
-    std::map<int, coroutine *> id2routine_;
-    coroutine **routine_;
-};
-
-class CoroutineScheduler // non copyable
-{
-  public:
-  public:
-    explicit CoroutineScheduler(int stacksize = 1024) : impl_(new SchedulerImpl(stacksize)) {}
-    ~CoroutineScheduler()
-    {
-        delete impl_;
-    }
-
-    int DestroyCoroutine(int id)
-    {
-        return impl_->DestroyCoroutine(id);
-    }
-    int CreateCoroutine(CoFunc func, void *arg)
-    {
-        return impl_->CreateCoroutine(func, arg);
-    }
-
-    int Yield(int y = 0)
-    {
-        return impl_->Yield();
-    }
-    int ResumeCoroutine(int id, int y = 0)
-    {
-        return impl_->ResumeCoroutine(id, y);
-    }
-
-    bool IsCoroutineAlive(int id) const
-    {
-        return impl_->IsCoroutineAlive(id);
+        else
+            return true;
     }
 
   private:
@@ -199,7 +111,11 @@ class CoroutineScheduler // non copyable
     CoroutineScheduler &operator=(const CoroutineScheduler &);
 
   private:
-    class SchedulerImpl *impl_;
+    char stack[STACK_SIZE];
+    ucontext_t ctx_main_;
+    int running_; //正在运行的　ＩＤ
+    std::map<int, Coroutine *> mmap_;
+    int index_;
 };
 
 #endif

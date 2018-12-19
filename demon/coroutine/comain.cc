@@ -1,50 +1,55 @@
 #include "coroutine.h"
+#include <stdio.h>
 
-#include <iostream>
-
-using namespace std;
-
-CoroutineScheduler *sched = NULL;
-
-void func1(void *arg)
+struct args
 {
-    int test = *(int *)arg;
-    cout << "function1 a now!,arg:" << test << ", start to yield." << endl;
-    sched->Yield();
-    cout << "1.fun1 return from yield  " << endl;
-    sched->Yield();
-    cout << "2.fun1 return from yield: going to stop" << endl;
-}
+    int n;
+};
 
-void func2(void *s)
+CoroutineScheduler scheduler;
+
+static void
+foo(void *ud)
 {
-    cout << "function2 a now!, arg: start to yield." << endl;
-    sched->Yield();
-    cout << "fun2 return from yield:going to stop" << endl;
+    struct args *arg = ud;
+    int start = arg->n;
+    int i;
+    for (i = 0; i < 5; i++)
+    {
+        printf("coroutine %d : %d\n", schedule.GetId(), start + i);
+        schedule.Yield();
+    }
 }
 
 int main()
 {
-    sched = new CoroutineScheduler();
+    struct args arg1 = {0};
+    struct args arg2 = {100};
 
-    bool stop = false;
-    int f1 = sched->CreateCoroutine(func1, (void *)111);
-    int f2 = sched->CreateCoroutine(func2, (void *)222);
-    for (int i = 0; i < 5; i++)
+    // int co1 = coroutine_new(S, foo, &arg1);
+
+    int co1 = schedule.CreateCoroutine(foo, &arg1);
+    int co2 = schedule.CreateCoroutine(foo, &arg2);
+
+    // int co2 = coroutine_new(S, foo, &arg2);
+
+    printf("main start\n");
+
+    // while (coroutine_status(S, co1) && coroutine_status(S, co2))
+    // {
+    //     coroutine_resume(S, co1);
+
+    //     coroutine_resume(S, co2);
+    // }
+    while (1)
     {
-        if (sched->IsCoroutineAlive(f1))
-        {
-            sched->ResumeCoroutine(f1);
-            cout << "func1 yield: " << endl;
-        }
+        if (schedule.IsAlive(co1))
+            schedule.ResumeCoroutine(co1);
 
-        if (sched->IsCoroutineAlive(f2))
-        {
-            sched->ResumeCoroutine(f2);
-            cout << "func2 yield:" << endl;
-        }
+        if (schedule.IsAlive(co2))
+            schedule.ResumeCoroutine(co2);
     }
+    printf("main end\n");
 
-    delete sched;
     return 0;
 }

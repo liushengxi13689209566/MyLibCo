@@ -13,7 +13,7 @@
 #include <ucontext.h>
 #include <assert.h>
 
-typedef std::function<void(void *)> Fun;
+typedef void (*CoFunc)(void *arg);
 
 enum Status
 {
@@ -25,14 +25,10 @@ enum Status
 
 struct coroutine
 {
-	// void *arg;
-  public:
-	coroutine(int size)
-	{
-	}
+	void *arg;
 	int status;
 	ucontext_t ctx;
-	Fun func;
+	CoFunc func;
 	char stack[1024];
 };
 
@@ -45,7 +41,7 @@ class SchedulerImpl
 	SchedulerImpl(const SchedulerImpl &) = delete;
 	SchedulerImpl &operator=(const SchedulerImpl &) = delete;
 
-	int CreateCoroutine(Fun func)
+	int CreateCoroutine(CoFunc func)
 	{
 		printf("start ....... \n");
 
@@ -151,7 +147,7 @@ class CoroutineScheduler
 	{
 		return imp1->DestroyCoroutine(id);
 	}
-	int CreateCoroutine(Fun func)
+	int CreateCoroutine(CoFunc func)
 	{
 		return imp1->CreateCoroutine(func);
 	}
