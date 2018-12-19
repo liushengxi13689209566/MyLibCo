@@ -5,8 +5,7 @@
 	> Created Time: 2018年12月19日 星期三 12时01分56秒
  ************************************************************************/
 
-#include "./CoroutineSchedule.h"
-#include "./Coroutine.h"
+#include "Coroutine.h"
 
 #include <iostream>
 #include <unistd.h>

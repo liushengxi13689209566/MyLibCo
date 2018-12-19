@@ -29,6 +29,10 @@ void Coroutine::SetStatus(int status)
 {
 	status_ = status;
 }
+int Coroutine::GetStatus()
+{
+	return status_;
+}
 void Coroutine::save_stack(void *top)
 {
 	char dummy = 0;

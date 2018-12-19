@@ -33,6 +33,7 @@ class Coroutine
 	Coroutine &operator=(const Coroutine &) = delete;
 
 	void SetStatus(int status);
+	int GetStatus();
 
   private:
 	friend class CoroutineSchedule;

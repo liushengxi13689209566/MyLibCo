@@ -5,7 +5,7 @@
 	> Created Time: 2018年12月19日 星期三 12时00分36秒
  ************************************************************************/
 
-#include "./Coroutine.h"
+#include "Coroutine.h"
 
 namespace Tattoo
 {
@@ -25,13 +25,17 @@ void CoroutineSchedule::DestroyCroutine(int cor_id)
 	if (cor_id == cur_run_id_)
 		cur_run_id_ = -1;
 	mmap_[cor_id]->SetStatus(Coroutine::CO_DEAD);
-	cur_co_num_--;
+	cur_co_num_--; /*下次重复使用就行了，不需要 erase */
 }
 void CoroutineSchedule::Yield()
 {
 }
 bool CoroutineSchedule::IsAlive(int cor_id)
 {
+	if (mmap_[cor_id]->GetStatus() == Coroutine::CO_DEAD)
+		return false;
+	else
+		return true;
 }
 void CoroutineSchedule::ResumeCoroutine(int cor_id)
 {
