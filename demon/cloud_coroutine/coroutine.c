@@ -167,6 +167,9 @@ void coroutine_resume(struct schedule *S, int id)
 static void
 _save_stack(struct coroutine *C, char *top)
 {
+	printf("stack:%p \n", stack);
+	printf("top:%p \n", top);
+
 	char dummy = 0;
 	assert(top - &dummy <= STACK_SIZE);
 	if (C->cap < top - &dummy)
