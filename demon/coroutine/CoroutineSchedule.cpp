@@ -5,11 +5,10 @@
 	> Created Time: 2018年12月19日 星期三 12时00分36秒
  ************************************************************************/
 
-#ifndef _COROUTINESCHEDULER_H
-#define _COROUTINESCHEDULER_H
-
 #include "./Coroutine.h"
 
+namespace Tattoo
+{
 #define INFO(x) std::cout << x << std::endl;
 
 int CoroutineSchedule::CreateCoroutine(CoFun func)
@@ -28,4 +27,13 @@ void CoroutineSchedule::DestroyCroutine(int cor_id)
 	mmap_[cor_id]->SetStatus(Coroutine::CO_DEAD);
 	cur_co_num_--;
 }
-#endif
+void CoroutineSchedule::Yield()
+{
+}
+bool CoroutineSchedule::IsAlive(int cor_id)
+{
+}
+void CoroutineSchedule::ResumeCoroutine(int cor_id)
+{
+}
+} // namespace Tattoo

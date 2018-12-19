@@ -6,26 +6,25 @@
  ************************************************************************/
 
 #ifndef _COROUTINESCHEDULER_H
-#define _COROUTINESCHEDULER_H
+#define _COROUTINESCHEDULER_H //B.h
 
 #include <ucontext.h>
 #include <unordered_map>
 #include <memory>
 #include <functional>
-// #include "./Coroutine.h"
 
 #define INFO(x) std::cout << x << std::endl;
 
 namespace Tattoo
 {
-using CoFun = std::function<void()>;
-class Coroutine;
 
+class Coroutine;
 class CoroutineSchedule
 {
   public:
 	static const int STACK_SIZE = 1024 * 1024;
 	static const int MAX_CO = 16;
+	using CoFun = std::function<void()>;
 
 	CoroutineSchedule() : cur_co_num_(0), cur_run_id_(-1) {}
 	~CoroutineSchedule() {}
@@ -33,22 +32,8 @@ class CoroutineSchedule
 	CoroutineSchedule(const CoroutineSchedule &) = delete;
 	CoroutineSchedule &operator=(const CoroutineSchedule &) = delete;
 
-	int CreateCoroutine(CoFun func)
-	{
-		cur_co_num_++;
-		auto cor = std::make_shared<Coroutine>(this, func, cur_co_num_);
-		mmap_[cur_co_num_] = cor;
-		return cur_co_num_;
-	}
-	void DestroyCroutine(int cor_id)
-	{
-		if (mmap_.find(cor_id) == mmap_.end())
-			return;
-		if (cor_id == cur_run_id_)
-			cur_run_id_ = -1;
-		mmap_[cor_id]->SetStatus(Coroutine::CO_DEAD);
-		cur_co_num_--;
-	}
+	int CreateCoroutine(CoFun func);
+	void DestroyCroutine(int cor_id);
 	void ResumeCoroutine(int cor_id);
 	void Yield();
 
