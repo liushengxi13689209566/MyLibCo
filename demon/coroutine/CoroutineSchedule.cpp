@@ -12,6 +12,7 @@ namespace Tattoo
 
 int CoroutineSchedule::CreateCoroutine(CoFun func)
 {
+	/*这里可以用 cur_max_num_　去限制协程数目*/
 	cur_co_num_++;
 	auto cor = std::make_shared<Coroutine>(this, func, cur_co_num_);
 	mmap_[cur_co_num_] = cor;
@@ -93,5 +94,6 @@ void CoroutineSchedule::static_fun(void *arg)
 
 	sch->cur_run_id_ = -1;
 	sch->mmap_[id]->SetStatus(Coroutine::CO_FINSHED);
+	delete[] cor->CorStack;
 }
 } // namespace Tattoo

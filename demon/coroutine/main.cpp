@@ -43,7 +43,7 @@ class TEST
 		// cout << "y" << endl;
 		// cout << "z" << endl;
 		// s->Yield();
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < 10; i++)
 		{
 			cout << "coroutine : " << s->GetCurCoID() << " : " << *(int *)arg + i << endl;
 			s->Yield();
@@ -58,7 +58,9 @@ int main()
 	int test1 = 1;
 	int test2 = 2;
 	int test3 = 3;
+
 	TEST tt;
+
 	int id_co1 = schedule->CreateCoroutine(std::bind(&TEST::func3, &tt, schedule, &test1));
 	int id_co2 = schedule->CreateCoroutine(std::bind(&TEST::func3, &tt, schedule, &test2));
 	int id_co3 = schedule->CreateCoroutine(std::bind(&TEST::func3, &tt, schedule, &test3));
