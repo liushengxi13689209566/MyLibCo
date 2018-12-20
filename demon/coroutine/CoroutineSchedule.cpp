@@ -47,7 +47,7 @@ bool CoroutineSchedule::IsAlive(int cor_id)
 }
 void CoroutineSchedule::ResumeCoroutine(int cor_id)
 {
-	INFO("*******************************************ResumeCoroutine", cor_id, cur_run_id_);
+	// INFO("*******************************************ResumeCoroutine", cor_id, cur_run_id_);
 
 	if (mmap_.find(cor_id) == mmap_.end()) /*不存在的 id */
 		return;
