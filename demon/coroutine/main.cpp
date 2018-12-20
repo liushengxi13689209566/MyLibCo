@@ -56,20 +56,26 @@ int main()
 	int id_co2 = schedule->CreateCoroutine(std::bind(&func2, schedule, &test2));
 
 	printf("main start\n");
+	int flag = 1;
 	while (1)
 	{
+		flag = 1;
 		if (schedule->IsAlive(id_co1))
 		{
+			flag++;
 			cout << "id_cor1   true" << endl;
 			schedule->ResumeCoroutine(id_co1);
 		}
 
 		if (schedule->IsAlive(id_co2))
 		{
+			flag++;
 			cout << "id_cor2   true" << endl;
 			schedule->ResumeCoroutine(id_co2);
 		}
 		sleep(1);
+		if (flag == 1)
+			break;
 	}
 	printf("main end\n");
 

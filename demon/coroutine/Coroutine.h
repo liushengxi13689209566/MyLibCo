@@ -21,7 +21,7 @@ class Coroutine
 	using CoFun = std::function<void()>;
 	enum
 	{
-		CO_DEAD,
+		CO_FINSHED,
 		CO_READY,
 		CO_RUNNING,
 		CO_SUSPEND,

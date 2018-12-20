@@ -12,9 +12,9 @@
 #include <unordered_map>
 #include <memory>
 #include <functional>
+#include <iostream>
 
-#define INFO(x) std::cout << x << std::endl;
-
+#define INFO(x, y, z) std::cout << x << " : " << y << " : " << z << std::endl;
 namespace Tattoo
 {
 

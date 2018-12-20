@@ -9,7 +9,6 @@
 
 namespace Tattoo
 {
-#define INFO(x) std::cout << x << std::endl;
 
 int CoroutineSchedule::CreateCoroutine(CoFun func)
 {
@@ -24,13 +23,14 @@ void CoroutineSchedule::DestroyCroutine(int cor_id)
 		return;
 	if (cor_id == cur_run_id_)
 		cur_run_id_ = -1;
-	mmap_[cor_id]->SetStatus(Coroutine::CO_DEAD);
+	mmap_[cor_id]->SetStatus(Coroutine::CO_FINSHED);
 	cur_co_num_--; /*下次重复使用就行了，不需要 erase */
 }
 void CoroutineSchedule::Yield()
 {
+	if (-1 == cur_run_id_)
+		return;
 	int id = cur_run_id_;
-	assert(id != -1);
 	std::shared_ptr<Coroutine> cor = mmap_[id];
 	// assert(reinterpret_cast<char *>(&cor) > );
 	cor->save_stack(SchStack + STACK_SIZE);
@@ -40,16 +40,20 @@ void CoroutineSchedule::Yield()
 }
 bool CoroutineSchedule::IsAlive(int cor_id)
 {
-	if (mmap_[cor_id]->GetStatus() == Coroutine::CO_DEAD)
+	if (mmap_[cor_id]->GetStatus() == Coroutine::CO_FINSHED)
 		return false;
 	else
 		return true;
 }
 void CoroutineSchedule::ResumeCoroutine(int cor_id)
 {
-	assert(this->cur_run_id_ == -1); //保证没有其他协程运行
-	if (mmap_.find(cor_id) == mmap_.end())
+	INFO("*******************************************ResumeCoroutine", cor_id, cur_run_id_);
+
+	if (mmap_.find(cor_id) == mmap_.end()) /*不存在的 id */
 		return;
+
+	assert(this->cur_run_id_ == -1); //保证没有其他协程运行
+
 	std::shared_ptr<Coroutine> cor = mmap_[cor_id];
 	switch (cor->GetStatus())
 	{
@@ -74,7 +78,11 @@ void CoroutineSchedule::ResumeCoroutine(int cor_id)
 		swapcontext(&main_ctx, &cor->ctx_);
 	}
 	break;
+	default:
+		assert(0);
 	}
+	if (-1 == cur_run_id_ && cor->status_ == Coroutine::CO_FINSHED)
+		DestroyCroutine(cor_id);
 }
 void CoroutineSchedule::static_fun(void *arg)
 {
@@ -82,5 +90,8 @@ void CoroutineSchedule::static_fun(void *arg)
 	int id = sch->cur_run_id_;
 	std::shared_ptr<Coroutine> cor = sch->mmap_[id];
 	cor->func_();
+
+	sch->cur_run_id_ = -1;
+	sch->mmap_[id]->SetStatus(Coroutine::CO_FINSHED);
 }
 } // namespace Tattoo
