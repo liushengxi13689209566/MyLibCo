@@ -40,9 +40,11 @@ class CoroutineSchedule
 	bool IsAlive(int cor_id);
 	int GetCurCoID() { return cur_run_id_; }
 
+	static void static_fun(void *arg);
+
   private:
 	std::unordered_map<int, std::shared_ptr<Coroutine>> mmap_;
-	char stack_[STACK_SIZE] = {0};
+	char SchStack[STACK_SIZE] = {0};
 	ucontext_t main_ctx;
 	int cur_co_num_; /*实时记录协程数量,也会控制map下标*/
 	int cur_run_id_;

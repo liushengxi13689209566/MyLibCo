@@ -46,7 +46,7 @@ class Coroutine
 	std::ptrdiff_t stack_max_size_; //stack最大 大小
 	std::ptrdiff_t stack_cur_size_; //协程实际大小
 	int status_;
-	char *stack_;
+	char *CorStack;
 	int id_;
 };
 } // namespace Tattoo

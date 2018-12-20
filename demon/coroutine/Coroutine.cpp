@@ -17,12 +17,12 @@ namespace Tattoo
 Coroutine::Coroutine(CoroutineSchedule *sch, CoFun func, int id)
 	: func_(func), id_(id), sch_(sch),
 	  stack_max_size_(0), stack_cur_size_(0),
-	  status_(CO_READY), stack_(0)
+	  status_(CO_READY), CorStack(0)
 {
 }
 Coroutine::~Coroutine()
 {
-	delete[] stack_;
+	delete[] CorStack;
 }
 
 void Coroutine::SetStatus(int status)
@@ -41,11 +41,11 @@ void Coroutine::save_stack(void *top)
 
 	if (stack_max_size_ < (char *)top - &dummy)
 	{
-		delete[] stack_;
+		delete[] CorStack;
 		stack_max_size_ = (char *)top - &dummy;
-		stack_ = new char[stack_max_size_];
+		CorStack = new char[stack_max_size_];
 	}
 	stack_cur_size_ = (char *)top - &dummy;
-	memcpy(stack_, &dummy, stack_cur_size_);
+	memcpy(CorStack, &dummy, stack_cur_size_);
 }
 } // namespace Tattoo

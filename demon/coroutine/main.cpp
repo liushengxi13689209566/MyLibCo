@@ -16,11 +16,12 @@ void func1(std::shared_ptr<CoroutineSchedule> s, void *arg)
 {
 	cout << "1" << endl;
 	cout << "2" << endl;
+	cout << *(int *)arg << endl; // 6666
 	s->Yield();
 	cout << "3" << endl;
 	s->Yield();
 }
-void func2(std::shared_ptr<CoroutineSchedule> s, void *arg)
+void func2(std::shared_ptr<CoroutineSchedule> s, void *arg) //9999
 {
 	cout << "a" << endl;
 	cout << *(int *)arg << endl;
@@ -58,10 +59,16 @@ int main()
 	while (1)
 	{
 		if (schedule->IsAlive(id_co1))
+		{
+			cout << "id_cor1   true" << endl;
 			schedule->ResumeCoroutine(id_co1);
+		}
 
 		if (schedule->IsAlive(id_co2))
+		{
+			cout << "id_cor2   true" << endl;
 			schedule->ResumeCoroutine(id_co2);
+		}
 		sleep(1);
 	}
 	printf("main end\n");
