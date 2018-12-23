@@ -154,7 +154,12 @@ void coroutine_resume(struct schedule *S, int id)
 		swapcontext(&S->main, &C->ctx);
 		break;
 	case COROUTINE_SUSPEND:
+		printf("S->stack ==%p\n", S->stack);
+		printf("S->stack+STACK_SIZE ==%p\n", S->stack + STACK_SIZE);
+		printf("\n\nS->stack + STACK_SIZE - C->size==  %p \n\n", S->stack + STACK_SIZE - C->size);
+
 		memcpy(S->stack + STACK_SIZE - C->size, C->stack, C->size);
+
 		S->running = id;
 		C->status = COROUTINE_RUNNING;
 		swapcontext(&S->main, &C->ctx);
@@ -167,18 +172,23 @@ void coroutine_resume(struct schedule *S, int id)
 static void
 _save_stack(struct coroutine *C, char *top)
 {
-	printf("stack:%p \n", stack);
 	printf("top:%p \n", top);
 
 	char dummy = 0;
+	printf("dummy:%p \n", &dummy);
+
 	assert(top - &dummy <= STACK_SIZE);
+
+	printf("STACK_ZISE:%d \n", STACK_SIZE);
+	printf("top - &dummy:%ld \n\n\n\n", top - &dummy);
+
 	if (C->cap < top - &dummy)
 	{
 		free(C->stack);
 		C->cap = top - &dummy;
 		C->stack = malloc(C->cap);
 	}
-	C->size = top - &dummy;
+	C->size = top - &dummy; /*c->stack 是在堆上的*/
 	memcpy(C->stack, &dummy, C->size);
 }
 
@@ -188,7 +198,12 @@ void coroutine_yield(struct schedule *S)
 	assert(id >= 0);
 	struct coroutine *C = S->co[id];
 	assert((char *)&C > S->stack);
+
+	printf("S->stack ==%p\n", S->stack);
+	printf("S->stack+STACK_SIZE ==%p\n", S->stack + STACK_SIZE);
+
 	_save_stack(C, S->stack + STACK_SIZE);
+
 	C->status = COROUTINE_SUSPEND;
 	S->running = -1;
 	swapcontext(&C->ctx, &S->main);

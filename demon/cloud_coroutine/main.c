@@ -12,7 +12,7 @@ foo(struct schedule *S, void *ud)
 	struct args *arg = ud;
 	int start = arg->n;
 	int i;
-	for (i = 0; i < 5; i++)
+	for (i = 0; i < 1; i++)
 	{
 		printf("coroutine %d : %d\n", coroutine_running(S), start + i);
 		coroutine_yield(S);
