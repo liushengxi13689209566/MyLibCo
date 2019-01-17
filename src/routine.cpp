@@ -9,8 +9,8 @@
 #include <unistd.h>
 #include <sys/syscall.h> /* For SYS_xxx definitions */
 #include <cstring>
-#include "liu_routine.h"
-#include "liu_callback.h"
+#include "routine.h"
+#include "callback.h"
 
 namespace Tattoo
 {

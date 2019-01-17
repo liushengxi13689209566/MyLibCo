@@ -76,7 +76,7 @@ CFLAGS += -std=c++11 -g -fno-strict-aliasing -O2 -Wall -export-dynamic \
 LINKS += -std=c++11 -g -L./lib -lcolib -lpthread -ldl 
 
 #生成静态库和动态库时需要的文件
-COLIB_OBJS=liu_routine.o  coctx_swap.o coctx.o
+COLIB_OBJS=routine.o  coctx_swap.o coctx.o
 
 PROGS = colib liu_hello 
 # liu_EchoServer 
@@ -113,8 +113,8 @@ libcolib.so: $(COLIB_OBJS)
 # 	$(BUILDEXE)
 # example_closure:example_closure.o
 # 	$(BUILDEXE)
-liu_hello:liu_hello.o
-	$(BUILDEXE)
+# liu_hello:liu_hello.o
+# 	$(BUILDEXE)
 # liu_EchoServer:liu_EchoServer.o
 # 	$(BUILDEXE)
 

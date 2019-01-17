@@ -5,8 +5,8 @@
 	> Created Time: 2019年01月16日 星期三 16时56分49秒
  ************************************************************************/
 
-#ifndef _LIU_COCTX_H
-#define _LIU_COCTX_H
+#ifndef _COCTX_H
+#define _COCTX_H
 
 #include <stdlib.h>
 typedef void *(*coctx_pfn_t)(void *s, void *s2);
