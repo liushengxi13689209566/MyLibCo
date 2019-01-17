@@ -18,11 +18,11 @@ extern "C"
 {
     extern void coctx_swap(Coctx_t *, Coctx_t *) asm("coctx_swap");
 };
-
+/********************tool function******************************/
 Routine_t *GetCurrRoutine(RoutineEnv_t *env);
 
-/*辅助函数*/
-//获取时间
+/********************tool function end......********************/
+
 //得到 线程ID
 static pid_t GetTid()
 {
@@ -47,18 +47,16 @@ void init_curr_thread_env()
     RoutineEnv_t *env = ArrayEnvPerThread[tid];
 
     Routine_t *self = new Routine_t(env, NULL, NULL, NULL);
-    self->IsMainRoutine_ = true;
+    self->IsMainRoutine_ = true; //设置为主协程
 
     Coctx_init(&self->ctx_);
     env->CallStack_[env->CallStackSize_++] = self;
 }
-//得到当前线程的协程环境，如果没有就进行初始化
+//得到当前线程的协程环境
 RoutineEnv_t *get_curr_thread_env()
 {
     return ArrayEnvPerThread[GetTid()];
 }
-// 得到当前　协程
-
 Routine_t::Routine_t(RoutineEnv_t *env, const RoutineAttr_t *attr,
                      RoutineFun pfn, void *arg)
     : env_(env),
@@ -87,14 +85,32 @@ Routine_t::Routine_t(RoutineEnv_t *env, const RoutineAttr_t *attr,
         at.stack_size_ += 0x1000;
     }
     //协程自己的栈内存
-    StackMemory_t *stack_mem = new StackMemory_t();
+    StackMemory_t *stack_mem = NULL;
     if (at.share_stack_)
     {
-        
+        stack_mem = get_stack_form_share(at.stack_size_);
+        at.stack_size_ = at.share_stack_->stack_size_;
     }
     else
     {
+        stack_mem = new StackMemory_t(at.stack_size_);
     }
+    stack_mem_ = stack_mem;
+    ctx_.ss_sp = stack_mem->stack_buffer_;
+    ctx_.ss_size = stack_mem->stack_size_;
+    save_size_ = 0;
+    save_buffer_ = NULL;
+    std::cout << "创建一个协程　" << std::endl;
 }
-
+void Routine_t::Resume()
+{
+    Routine_t *curr_routine = env_->CallStack_[env_->CallStackSize_ - 1];
+    if (!IsRun_)
+    {
+        Coctx_make(&ctx_, (coctx_pfn_t)RoutineFunc, this, 0);
+        IsRun_ = true;
+    }
+    env_->CallStack_[env_->CallStackSize_++] = this;
+    Swap_two_routine(curr_routine, this);
+}
 } // namespace Tattoo
