@@ -56,7 +56,7 @@ public:
 class RoutineEnv_t
 {
 public:
-  RoutineEnv_t() : CallStackSize_(0), pending_(NULL), occupy_(NULL) {}
+  RoutineEnv_t() : CallStackSize_(0), pending_rou_(NULL), occupy_rou_(NULL) {}
   Routine_t *CallStack_[128]; //用于保存当前线程中的协程　　
   int CallStackSize_;         //相当于栈指针
 
@@ -88,7 +88,7 @@ public:
 class ShareStack_t
 {
 public:
-  unsigned int aloc_idx_;
+  unsigned int alloc_idx_;
   int stack_size_;
   int count;
   StackMemory_t **stack_array_;

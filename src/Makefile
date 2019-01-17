@@ -69,16 +69,17 @@ BUILDSHARELIB = $(CPPSHARE) $@.tmp $^ $(BS_FLAGS); \
 
 ########## options ##########
 #编译参数
-CFLAGS += -g -fno-strict-aliasing -O2 -Wall -export-dynamic \
+CFLAGS += -std=c++11 -g -fno-strict-aliasing -O2 -Wall -export-dynamic \
 	-Wall -pipe  -D_GNU_SOURCE -D_REENTRANT -fPIC -Wno-deprecated -m64
 
 #链接的库
-LINKS += -g -L./lib -lcolib -lpthread -ldl
+LINKS += -std=c++11 -g -L./lib -lcolib -lpthread -ldl 
 
 #生成静态库和动态库时需要的文件
-COLIB_OBJS=co_epoll.o co_routine.o co_hook_sys_call.o coctx_swap.o coctx.o
+COLIB_OBJS=liu_routine.o  coctx_swap.o coctx.o
 
-PROGS = colib liu_hello liu_EchoServer 
+PROGS = colib liu_hello 
+# liu_EchoServer 
 # example_poll example_echosvr example_echocli example_thread  example_cond example_specific example_copystack example_closure 
 
 #make 时默认编译 PROGS
@@ -96,8 +97,8 @@ libcolib.so: $(COLIB_OBJS)
 # 	$(BUILDEXE) 
 # example_echocli:example_echocli.o
 # 	$(BUILDEXE) 
-example_thread:example_thread.o
-	$(BUILDEXE) 
+# example_thread:example_thread.o
+# 	$(BUILDEXE) 
 # example_poll:example_poll.o
 # 	$(BUILDEXE) 
 # example_exit:example_exit.o
@@ -114,8 +115,8 @@ example_thread:example_thread.o
 # 	$(BUILDEXE)
 liu_hello:liu_hello.o
 	$(BUILDEXE)
-liu_EchoServer:liu_EchoServer.o
-	$(BUILDEXE)
+# liu_EchoServer:liu_EchoServer.o
+# 	$(BUILDEXE)
 
 dist: clean libco-$(version).src.tar.gz
 

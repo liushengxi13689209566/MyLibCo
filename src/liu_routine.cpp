@@ -33,12 +33,13 @@ void Swap_two_routine(Routine_t *curr, Routine_t *pending_rou);
 /*将共享栈上的数据 copy out */
 void save_stack_buffer(Routine_t *occupy_rou);
 
-Routine_t *GetCurrRoutine(RoutineEnv_t *env);
-
+/*从共享栈区得到一个栈空间*/
+static StackMemory_t *get_stack_form_share(ShareStack_t *share_stack);
 /********************tool function end......********************/
 
 //得到 线程ID
-static pid_t GetTid()
+static pid_t
+GetTid()
 {
     static __thread pid_t pid = 0;
     static __thread pid_t tid = 0; //定义一个线程局部变量很简单
@@ -102,7 +103,7 @@ Routine_t::Routine_t(RoutineEnv_t *env, const RoutineAttr_t *attr,
     StackMemory_t *stack_mem = NULL;
     if (at.share_stack_)
     {
-        stack_mem = get_stack_form_share(at.stack_size_);
+        stack_mem = get_stack_form_share(at.share_stack_);
         at.stack_size_ = at.share_stack_->stack_size_;
     }
     else
@@ -129,7 +130,7 @@ void Routine_t::Resume()
 }
 void Routine_t::Yield()
 {
-    yield_env(this->env);
+    yield_env(env_);
 }
 
 /*+++++++++++++++++++++++++++各个函数实现+++++++++++++++++++++++++++++++++++*/
@@ -152,6 +153,19 @@ static int RoutineFunc(Routine_t *rou, void *)
     RoutineEnv_t *env = rou->env_;
     yield_env(env);
     return 0;
+}
+
+/*从共享栈区得到一个栈空间*/
+static StackMemory_t *get_stack_form_share(ShareStack_t *share_stack)
+{
+    if (!share_stack)
+    {
+        return NULL;
+    }
+    int idx = share_stack->alloc_idx_ % share_stack->count;
+    share_stack->alloc_idx_++;
+
+    return share_stack->stack_array_[idx];
 }
 
 /*将共享栈上的数据 copy out */
@@ -218,4 +232,3 @@ void Swap_two_routine(Routine_t *curr, Routine_t *pending_rou)
 }
 } // namespace Tattoo
 /*+++++++++++++++++++++++++++各个函数实现 end..........++++++++++++++++++++++*/
-} // namespace Tattoo
