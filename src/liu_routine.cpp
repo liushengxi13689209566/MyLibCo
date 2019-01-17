@@ -19,16 +19,20 @@ extern "C"
     extern void coctx_swap(Coctx_t *, Coctx_t *) asm("coctx_swap");
 };
 /********************tool function******************************/
-//about Routine_t
-static int RoutineFunc(Routine_t *rou, void *)
-{
-    if (rou->pfn_)
-    {
-        rou->pfn_(rou->arg_);
-    }
-    rou->IsDead_ = true;
-    RoutineEnv_t *env = rou->env_;
-}
+//                   about Routine_t
+
+/*挂起当前的co_routine，切换到上一个co_routine，将当前的co_routine设置为上一个co_routine*/
+void yield_env(RoutineEnv_t *env);
+
+/*协程中要执行的函数,该函数会调用回调函数,并退出当前协程*/
+static int RoutineFunc(Routine_t *rou, void *);
+
+/*交换两个协程*/
+void Swap_two_routine(Routine_t *curr, Routine_t *pending_rou);
+
+/*将共享栈上的数据 copy out */
+void save_stack_buffer(Routine_t *occupy_rou);
+
 Routine_t *GetCurrRoutine(RoutineEnv_t *env);
 
 /********************tool function end......********************/
@@ -123,4 +127,95 @@ void Routine_t::Resume()
     env_->CallStack_[env_->CallStackSize_++] = this;
     Swap_two_routine(curr_routine, this);
 }
+void Routine_t::Yield()
+{
+    yield_env(this->env);
+}
+
+/*+++++++++++++++++++++++++++各个函数实现+++++++++++++++++++++++++++++++++++*/
+/*挂起当前的co_routine，切换到上一个co_routine，将当前的co_routine设置为上一个co_routine*/
+void yield_env(RoutineEnv_t *env)
+{
+    Routine_t *last = env->CallStack_[env->CallStackSize_ - 2];
+    Routine_t *curr = env->CallStack_[env->CallStackSize_ - 1];
+    env->CallStackSize_--;
+    Swap_two_routine(curr, last);
+}
+/*协程中要执行的函数,该函数会调用回调函数,并退出当前协程*/
+static int RoutineFunc(Routine_t *rou, void *)
+{
+    if (rou->pfn_)
+    {
+        rou->pfn_(rou->arg_);
+    }
+    rou->IsDead_ = true;
+    RoutineEnv_t *env = rou->env_;
+    yield_env(env);
+    return 0;
+}
+
+/*将共享栈上的数据 copy out */
+void save_stack_buffer(Routine_t *occupy_rou)
+{
+    StackMemory_t *stack_mem = occupy_rou->stack_mem_;
+    int len = stack_mem->stack_bp_ - occupy_rou->stack_sp_;
+    //如果已经保存过一次
+    if (occupy_rou->save_buffer_)
+    {
+        free(occupy_rou->save_buffer_);
+        occupy_rou->save_buffer_ = NULL;
+    }
+    occupy_rou->save_buffer_ = new char(len);
+    occupy_rou->save_size_ = len;
+    memcpy(occupy_rou->save_buffer_, occupy_rou->stack_sp_, len);
+}
+
+/*交换两个协程*/
+void Swap_two_routine(Routine_t *curr, Routine_t *pending_rou)
+{
+    RoutineEnv_t *env = get_curr_thread_env();
+    char ch;
+    //co_swap函数里面最后一个声明的局部变量，
+    //ch所在的内存地址就是当前栈顶地址，即ESP寄存器内保存的值
+    curr->stack_sp_ = &ch;
+    if (!pending_rou->IsShareStack)
+    {
+        env->pending_rou_ = NULL;
+        env->occupy_rou_ = NULL;
+    }
+    else //共享栈的情况下
+    {
+        env->pending_rou_ = pending_rou;
+        //取出原本占用这块空间的corountine
+        Routine_t *occupy_rou = pending_rou->stack_mem_->occupy_routine_;
+        //将这块空间的占有者设置成将要运行的 coroutine
+        pending_rou->stack_mem_->occupy_routine_ = pending_rou;
+
+        env->occupy_rou_ = occupy_rou;
+        //如果pending_co的栈区内存又被一个co_routine占用，
+        //并且该co_routine不是pending_co，
+        //则新申请一段内存区域保存下ocupy_co的stack_mem
+        if (occupy_rou && occupy_rou != pending_rou)
+        {
+            save_stack_buffer(occupy_rou);
+        }
+    }
+    //这句代码执行完成后，CPU已经切换到pending_co
+    coctx_swap(&(curr->ctx_), &(pending_rou->ctx_));
+    //pending_co 退出，又回到 curr
+    RoutineEnv_t *curr_env = get_curr_thread_env();
+    Routine_t *update_occupy_co = curr_env->occupy_rou_;
+    Routine_t *update_pending_co = curr_env->pending_rou_;
+
+    if (update_occupy_co && update_pending_co && update_occupy_co != update_pending_co)
+    {
+        // resume stack buffer
+        if (update_pending_co->save_buffer_ && update_pending_co->save_size_ > 0)
+        {
+            memcpy(update_pending_co->stack_sp_, update_pending_co->save_buffer_, update_pending_co->save_size_);
+        }
+    }
+}
+} // namespace Tattoo
+/*+++++++++++++++++++++++++++各个函数实现 end..........++++++++++++++++++++++*/
 } // namespace Tattoo

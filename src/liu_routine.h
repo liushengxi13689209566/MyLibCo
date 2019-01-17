@@ -60,9 +60,8 @@ public:
   Routine_t *CallStack_[128]; //用于保存当前线程中的协程　　
   int CallStackSize_;         //相当于栈指针
 
-  /*关于日志*/
-  Routine_t *pending_;
-  Routine_t *occupy_;
+  Routine_t *pending_rou_;
+  Routine_t *occupy_rou_;
 };
 class StackMemory_t
 {
