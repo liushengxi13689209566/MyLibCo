@@ -19,6 +19,16 @@ extern "C"
     extern void coctx_swap(Coctx_t *, Coctx_t *) asm("coctx_swap");
 };
 /********************tool function******************************/
+//about Routine_t
+static int RoutineFunc(Routine_t *rou, void *)
+{
+    if (rou->pfn_)
+    {
+        rou->pfn_(rou->arg_);
+    }
+    rou->IsDead_ = true;
+    RoutineEnv_t *env = rou->env_;
+}
 Routine_t *GetCurrRoutine(RoutineEnv_t *env);
 
 /********************tool function end......********************/
