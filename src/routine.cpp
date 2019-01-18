@@ -38,6 +38,7 @@ static StackMemory_t *get_stack_form_share(ShareStack_t *share_stack);
 
 //得到 线程ID
 static pid_t
+
 GetTid()
 {
     static __thread pid_t pid = 0;
