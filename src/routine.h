@@ -18,7 +18,7 @@ namespace Tattoo
 class RoutineEnv_t;
 class RoutineAttr_t;
 class StackMemory_t;
-class ShareStack_t;
+// class ShareStack_t;
 
 class Routine_t
 {
@@ -30,14 +30,14 @@ public:
   Routine_t &operator=(const Routine_t &Routine_t) = delete;
   Routine_t &operator=(Routine_t &&Routine_t) noexcept = delete;
 
-  ~Routine_t() {}
+  ~Routine_t();
   void Resume();
   void Yield();
 
   RoutineEnv_t *env_; //当前协程环境
   RoutineFun pfn_;    //协程回调函数
   void *arg_;         //函数参数
-  Coctx_t ctx_;       //保存上下文
+  coctx_t ctx_;       //保存上下文
 
   bool IsRun_;         //协程是否运行 cstart
   bool IsDead_;        //协程是否结束 cend
@@ -70,8 +70,8 @@ public:
       : occupy_routine_(NULL),
         stack_size_(stack_size)
   {
-    stack_buffer_ = new char(stack_size);
-    stack_bp_ = stack_buffer_ + stack_size;
+    stack_buffer_ = new char(stack_size_);
+    stack_bp_ = stack_buffer_ + stack_size_;
   }
   Routine_t *occupy_routine_; //当前协程指针
   unsigned int stack_size_;   //栈大小
@@ -81,9 +81,9 @@ public:
 class RoutineAttr_t
 {
 public:
-  RoutineAttr_t() : stack_size_(128 * 1024), share_stack_(NULL) {}
+  RoutineAttr_t() : stack_size_(128 * 1024) {}
   int stack_size_;
-  ShareStack_t *share_stack_;
+  // ShareStack_t *share_stack_;
 };
 class ShareStack_t
 {
