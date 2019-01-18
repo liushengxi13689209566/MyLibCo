@@ -14,7 +14,7 @@
 #include <functional>
 #include "callback.h"
 #include "coctx.h"
-#include "Time_heap.h"
+// #include "Time_heap.h"
 
 namespace Tattoo
 {
@@ -29,7 +29,13 @@ class Routine_t
 {
 public:
   //FIXME RoutineAttr_t use the *
-  Routine_t(RoutineEnv_t *env, const RoutineAttr_t *attr, void *(*pfn)(void *), void *arg);
+  Routine_t(RoutineEnv_t *env, const RoutineAttr_t *attr, void *(*routine)(void *), void *arg);
+
+  Routine_t(const Routine_t &Routine_t) noexcept = delete;
+  Routine_t(Routine_t &&Routine_t) noexcept = delete;
+  Routine_t &operator=(const Routine_t &Routine_t) = delete;
+  Routine_t &operator=(Routine_t &&Routine_t) noexcept = delete;
+
   ~Routine_t();
   void resume(); //运行当前协程
   void yield();  //退出当前协程
