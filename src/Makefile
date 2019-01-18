@@ -7,8 +7,8 @@ CPP = $(CXX)
 AR = ar -rc
 RANLIB = ranlib
 
-CPPSHARE = $(CPP) -fPIC -shared -O2 -pipe -L$(SRCROOT)/solib/ -o 
-CSHARE = $(CC) -fPIC -shared -O2 -pipe -L$(SRCROOT)/solib/ -o 
+CPPSHARE = $(CPP) -fPIC -shared -O0 -pipe -L$(SRCROOT)/solib/ -o 
+CSHARE = $(CC) -fPIC -shared -O0 -pipe -L$(SRCROOT)/solib/ -o 
 
 #编译参数　
 CFLAGS= -g $(INCLS) -fPIC -DLINUX -pipe -c -fno-inline
@@ -69,7 +69,7 @@ BUILDSHARELIB = $(CPPSHARE) $@.tmp $^ $(BS_FLAGS); \
 
 ########## options ##########
 #编译参数
-CFLAGS += -std=c++11 -g -fno-strict-aliasing -O2 -Wall -export-dynamic \
+CFLAGS += -std=c++11 -g -fno-strict-aliasing -O0 -Wall -export-dynamic \
 	-Wall -pipe  -D_GNU_SOURCE -D_REENTRANT -fPIC -Wno-deprecated -m64
 
 #链接的库
@@ -113,8 +113,8 @@ libcolib.so: $(COLIB_OBJS)
 # 	$(BUILDEXE)
 # example_closure:example_closure.o
 # 	$(BUILDEXE)
-# liu_hello:liu_hello.o
-# 	$(BUILDEXE)
+liu_hello:liu_hello.o
+	$(BUILDEXE)
 # liu_EchoServer:liu_EchoServer.o
 # 	$(BUILDEXE)
 

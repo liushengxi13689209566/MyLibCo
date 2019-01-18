@@ -30,7 +30,7 @@ public:
   Routine_t &operator=(const Routine_t &Routine_t) = delete;
   Routine_t &operator=(Routine_t &&Routine_t) noexcept = delete;
 
-  ~Routine_t() noexcept;
+  ~Routine_t() {}
   void Resume();
   void Yield();
 

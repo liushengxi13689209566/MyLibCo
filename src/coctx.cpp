@@ -86,7 +86,7 @@ extern "C"
 };
 
 #if defined(__x86_64__)
-int coctx_make(Coctx_t *ctx, coctx_pfn_t pfn, const void *s, const void *s1)
+int Coctx_make(Coctx_t *ctx, coctx_pfn_t pfn, const void *s, const void *s1)
 {
     char *sp = ctx->ss_sp + ctx->ss_size;
     sp = (char *)((unsigned long)sp & -16LL);
@@ -103,7 +103,7 @@ int coctx_make(Coctx_t *ctx, coctx_pfn_t pfn, const void *s, const void *s1)
 }
 
 //初始化coctx
-int coctx_init(Coctx_t *ctx)
+int Coctx_init(Coctx_t *ctx)
 {
     memset(ctx, 0, sizeof(*ctx));
     return 0;

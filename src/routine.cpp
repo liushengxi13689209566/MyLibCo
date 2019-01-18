@@ -10,7 +10,6 @@
 #include <sys/syscall.h> /* For SYS_xxx definitions */
 #include <cstring>
 #include "routine.h"
-#include "callback.h"
 
 namespace Tattoo
 {
@@ -70,6 +69,11 @@ void init_curr_thread_env()
 //得到当前线程的协程环境
 RoutineEnv_t *get_curr_thread_env()
 {
+    if (!ArrayEnvPerThread[GetTid()])
+    {
+        init_curr_thread_env();
+    }
+    //std::cout<<"GetPid : "<<GetPid()<<std::endl;
     return ArrayEnvPerThread[GetTid()];
 }
 Routine_t::Routine_t(RoutineEnv_t *env, const RoutineAttr_t *attr,

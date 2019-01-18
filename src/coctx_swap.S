@@ -21,25 +21,13 @@
 #endif
 coctx_swap:
 
-/*struct coctx_t
-{
 #if defined(__i386__)
-	void *regs[ 8 ];
-#else
-	void *regs[ 14 ];
-#endif
-	size_t ss_size;
-	char *ss_sp;
-	
-}*/
+	leal 4(%esp), %eax //sp 
+	movl 4(%esp), %esp 
+	leal 32(%esp), %esp //parm a : &regs[7] + sizeof(void*)
 
-#if defined(__i386__)
-	leal 4(%esp), %eax //sp 保存栈顶指针 
-	movl 4(%esp), %esp  //指向 current 协程 coctx_t 的指针 
-	leal 32(%esp), %esp //parm a : &regs[7] + sizeof(void*) 指向ss_size
+	pushl %eax //esp ->parm a 
 
-	pushl %eax //esp ->parm a  栈顶保存到了 coctx_t->regs[7] 的位置
-    //保存各通用寄存器值
 	pushl %ebp
 	pushl %esi
 	pushl %edi
@@ -47,25 +35,21 @@ coctx_swap:
 	pushl %ecx
 	pushl %ebx
 	pushl -4(%eax)
-    //将 coctx_swap 的返回地址给保存起来了,放在coctx_t->regs[0] 的位置
 
 	
 	movl 4(%eax), %esp //parm b -> &regs[0]
 
-
-	popl %eax  //ret func addr 弹出 regs[0] 的值到 eax 寄存器
-    //从 regs[1]~regs[6] 恢复各寄存器的值
+	popl %eax  //ret func addr
 	popl %ebx  
 	popl %ecx
 	popl %edx
 	popl %edi
 	popl %esi
 	popl %ebp
-	popl %esp //将 pending 协程上次切换出去时的栈指针恢复
-                
-	pushl %eax //set ret func addr 设置函数返回地址
+	popl %esp
+	pushl %eax //set ret func addr
 
-	xorl %eax, %eax //清零%eax寄存器
+	xorl %eax, %eax
 	ret
 
 #elif defined(__x86_64__)
