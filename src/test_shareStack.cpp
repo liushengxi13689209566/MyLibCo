@@ -46,7 +46,7 @@ int main()
     while (true)
     {
         co[1]->Resume();
-        sleep(1);
+        // sleep(1);
         co[0]->Resume();
     }
     return 0;

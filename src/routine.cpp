@@ -213,6 +213,7 @@ void yield_env(RoutineEnv_t *env)
     Routine_t *last = env->CallStack_[env->CallStackSize_ - 2];
     Routine_t *curr = env->CallStack_[env->CallStackSize_ - 1];
     env->CallStackSize_--;
+    curr->IsRun_ = false;
     Swap_two_routine(curr, last);
 }
 /************************** other ********************************************/
