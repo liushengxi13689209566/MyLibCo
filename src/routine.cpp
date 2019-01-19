@@ -51,29 +51,30 @@ static RoutineEnv_t *ArrayEnvPerThread[204800] = {0};
 //初始化当前线程的协程环境
 void init_curr_thread_env()
 {
-    // pid_t tid = GetTid();
-    // ArrayEnvPerThread[tid] = new RoutineEnv_t();
-    // RoutineEnv_t *env = ArrayEnvPerThread[tid];
+    pid_t tid = GetTid();
+    ArrayEnvPerThread[tid] = new RoutineEnv_t();
+    RoutineEnv_t *env = ArrayEnvPerThread[tid];
 
-    // Routine_t *self = new Routine_t(env, NULL, NULL, NULL);
-    // self->IsMainRoutine_ = true; //设置为主协程
-
-    // coctx_init(&self->ctx_);
-    // env->CallStack_[env->CallStackSize_++] = self;
-    pid_t pid = GetTid();
-    ArrayEnvPerThread[pid] = new RoutineEnv_t();
-    RoutineEnv_t *env = ArrayEnvPerThread[pid];
-
-    env->CallStackSize_ = 0;
     Routine_t *self = new Routine_t(env, NULL, NULL, NULL);
-    self->IsMainRoutine_ = 1;
-
-    env->occupy_rou_ = NULL;
-    env->pending_rou_ = NULL;
+    self->IsMainRoutine_ = true; //设置为主协程
 
     coctx_init(&self->ctx_);
-
     env->CallStack_[env->CallStackSize_++] = self;
+
+    // pid_t pid = GetTid();
+    // ArrayEnvPerThread[pid] = new RoutineEnv_t();
+    // RoutineEnv_t *env = ArrayEnvPerThread[pid];
+
+    // env->CallStackSize_ = 0;
+    // Routine_t *self = new Routine_t(env, NULL, NULL, NULL);
+    // self->IsMainRoutine_ = 1;
+
+    // env->occupy_rou_ = NULL;
+    // env->pending_rou_ = NULL;
+
+    // coctx_init(&self->ctx_);
+
+    // env->CallStack_[env->CallStackSize_++] = self;
 }
 //得到当前线程的协程环境
 RoutineEnv_t *get_curr_thread_env()

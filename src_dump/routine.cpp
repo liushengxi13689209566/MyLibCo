@@ -87,8 +87,8 @@ void init_curr_thread_env()
     Routine_t *self = new Routine_t(env, NULL, NULL, NULL);
     self->IsMainRoutine_ = 1;
 
-    env->pending_ = NULL;
-    env->occupy_ = NULL;
+    env->pending_rou_ = NULL;
+    env->occupy_rou_ = NULL;
 
     coctx_init(&self->ctx_);
 
@@ -111,15 +111,6 @@ RoutineEnv_t *get_curr_thread_env()
     return g_arryEnvPerThread[GetPid()];
 }
 
-//栈内存
-StackMemory_t::StackMemory_t(int stack_size)
-    : occupy_co_(NULL),
-      stack_size_(stack_size)
-{
-    stack_buffer_ = (char *)malloc(stack_size_);
-    stack_bp_ = stack_buffer_ + stack_size_; //栈顶
-}
-
 //----------------Routine-----------------
 Routine_t::Routine_t(RoutineEnv_t *env,
                      const RoutineAttr_t *attr,
@@ -127,8 +118,8 @@ Routine_t::Routine_t(RoutineEnv_t *env,
     : env_(env),
       pfn_(pfn),
       arg_(arg),
-      Start_(0),
-      End_(0),
+      IsRun_(0),
+      IsDead_(0),
       IsMainRoutine_(0)
 {
     RoutineAttr_t at;
@@ -156,9 +147,9 @@ Routine_t::Routine_t(RoutineEnv_t *env,
     //分配栈内存
     StackMemory_t *stack_memry = new StackMemory_t(at.stack_size_);
 
-    stack_memry_ = stack_memry;
+    stack_memory_ = stack_memry;
 
-    ctx_.ss_sp = stack_memry_->stack_buffer_;
+    ctx_.ss_sp = stack_memory_->stack_buffer_;
     ctx_.ss_size = at.stack_size_;
 
     save_size_ = 0;
@@ -169,17 +160,17 @@ Routine_t::Routine_t(RoutineEnv_t *env,
 }
 
 //执行本协程
-void Routine_t::resume()
+void Routine_t::Resume()
 {
 
     RoutineEnv_t *env = env_;
     Routine_t *Current_Routine = env->CallStack_[env->CallStackSize_ - 1]; //取当前协程块指针
     //std::cout<<env->CallStackSize_<<std::endl;
     //协程首次执行,创建其上下文
-    if (!Start_)
+    if (!IsRun_)
     {
         coctx_make(&ctx_, (coctx_pfn_t)RoutineFunc, this, 0);
-        Start_ = 1;
+        IsRun_ = 1;
     }
 
     env->CallStack_[env->CallStackSize_++] = this; //将新协程块指针压入pCallStack栈中
@@ -187,10 +178,10 @@ void Routine_t::resume()
 }
 
 //退出本协程
-void Routine_t::yield()
+void Routine_t::Yield()
 {
     //确保不重复退出协程
-    assert(End_ == 0 && Start_ == 1);
+    assert(IsDead_ == 0 && IsRun_ == 1);
     yield_env(env_);
 }
 
@@ -198,8 +189,8 @@ Routine_t::~Routine_t()
 {
 
     //std::cout<<" Free Routine " << std::endl;
-    free(stack_memry_->stack_buffer_);
-    free(stack_memry_);
+    free(stack_memory_->stack_buffer_);
+    free(stack_memory_);
 }
 
 void yield_env(RoutineEnv_t *env_)
@@ -224,7 +215,7 @@ static int RoutineFunc(Routine_t *routine, void *)
         routine->pfn_(routine->arg_);
     }
 
-    routine->End_ = 1;
+    routine->IsDead_ = 1;
 
     RoutineEnv_t *env = routine->env_;
     //切回上一个栈中的上一个协程
@@ -244,8 +235,8 @@ void co_swap(Routine_t *Current_Routine, Routine_t *Pending_Routine)
     char c;
     Current_Routine->stack_sp_ = &c;
 
-    env->pending_ = NULL;
-    env->occupy_ = NULL;
+    env->pending_rou_ = NULL;
+    env->occupy_rou_ = NULL;
 
     //swap context
     coctx_swap(&(Current_Routine->ctx_), &(Pending_Routine->ctx_));
@@ -254,15 +245,15 @@ void co_swap(Routine_t *Current_Routine, Routine_t *Pending_Routine)
     //重新得到栈内存
     //stack buffer may be overwrite, so get again;
     RoutineEnv_t *curr_env = get_curr_thread_env();
-    Routine_t *update_occupy_co = curr_env->occupy_;
-    Routine_t *update_pending_co = curr_env->pending_;
-    if (update_occupy_co && update_pending_co && update_occupy_co != update_pending_co)
+    Routine_t *update_occupy_rou_co = curr_env->occupy_rou_;
+    Routine_t *update_pending_rou_co = curr_env->pending_rou_;
+    if (update_occupy_rou_co && update_pending_rou_co && update_occupy_rou_co != update_pending_rou_co)
     {
         //resume stack buffer
-        if (update_pending_co->save_buffer_ && update_pending_co->save_size_ > 0)
+        if (update_pending_rou_co->save_buffer_ && update_pending_rou_co->save_size_ > 0)
         {
-            memcpy(update_pending_co->stack_sp_, update_pending_co->save_buffer_,
-                   update_pending_co->save_size_);
+            memcpy(update_pending_rou_co->stack_sp_, update_pending_rou_co->save_buffer_,
+                   update_pending_rou_co->save_size_);
         }
     }
 }

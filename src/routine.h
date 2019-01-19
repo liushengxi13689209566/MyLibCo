@@ -70,7 +70,7 @@ public:
       : occupy_routine_(NULL),
         stack_size_(stack_size)
   {
-    stack_buffer_ = new char(stack_size_);
+    stack_buffer_ = (char *)malloc(stack_size_);
     stack_bp_ = stack_buffer_ + stack_size_;
   }
   Routine_t *occupy_routine_; //当前协程指针

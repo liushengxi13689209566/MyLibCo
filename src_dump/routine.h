@@ -37,61 +37,69 @@ public:
   Routine_t &operator=(Routine_t &&Routine_t) noexcept = delete;
 
   ~Routine_t();
-  void resume(); //运行当前协程
-  void yield();  //退出当前协程
+  void Resume(); //运行当前协程
+  void Yield();  //退出当前协程
 public:
   RoutineEnv_t *env_; //当前协程环境
   RoutineFun pfn_;    //协程块函数
   void *arg_;         //协程块函数对应的参数
   coctx_t ctx_;       //用来保存CPU上下文
 
-  char Start_;         //协程是否运行
-  char End_;           //协程是否结束
-  char IsMainRoutine_; //是否是主协程
+  char IsRun_;         //协程是否运行   cstart
+  char IsDead_;        //协程是否结束   cend
+  char IsMainRoutine_; //是否是主协程   cIsMain
 
-  StackMemory_t *stack_memry_; //协程运行栈内存
+  /********************************************占坑，hook层***********************************************************/
+  char EnableSysHook;
+  char IsShareStack;
+
+  StackMemory_t *stack_memory_; //协程运行栈内存
 
   char *stack_sp_;         //顶指针
   unsigned int save_size_; //buff大小
   char *save_buffer_;      //buff
 };
 
+class RoutineEnv_t
+{
+public:
+  RoutineEnv_t() : CallStackSize_(0), pending_rou_(NULL), occupy_rou_(NULL) {}
+  Routine_t *CallStack_[128]; //保存调用链
+  int CallStackSize_;         //栈指针
+
+  Routine_t *pending_rou_;
+  Routine_t *occupy_rou_;
+
+  //时间堆定时器
+  // Time_heap *time_heap_;
+};
+
 //协程栈
 class StackMemory_t
 {
 public:
-  StackMemory_t(int stack_size);
-
-public:
-  Routine_t *occupy_co_; //当前协程指针
-  int stack_size_;       //栈大小
-  char *stack_bp_;       //stack_buffer + stack_size
-  char *stack_buffer_;   //栈空间
-};
-
-class RoutineAttr_t //协程的参数
-{
-public:
-  RoutineAttr_t()
+  StackMemory_t(int stack_size)
+      : occupy_routine_(NULL),
+        stack_size_(stack_size)
   {
-    stack_size_ = 128 * 1024;
+    stack_buffer_ = (char *)malloc(stack_size_);
+    stack_bp_ = stack_buffer_ + stack_size_;
   }
 
 public:
-  int stack_size_; //栈大小
+  Routine_t *occupy_routine_; //当前协程指针
+  int stack_size_;            //栈大小
+  char *stack_bp_;            //stack_buffer + stack_size
+  char *stack_buffer_;        //栈空间
 };
 
-class RoutineEnv_t
+class RoutineAttr_t
 {
 public:
-  Routine_t *CallStack_[128]; //保存调用链
-  int CallStackSize_;         //栈指针
-  //for copy stack log lastco and nextco
-  Routine_t *pending_;
-  Routine_t *occupy_;
+  RoutineAttr_t() : stack_size_(128 * 1024) {}
+  int stack_size_;
 
-  //时间堆定时器
-  // Time_heap *time_heap_;
+  // ShareStack_t *share_stack_;
 };
 
 //------------协程调度-------------------------------

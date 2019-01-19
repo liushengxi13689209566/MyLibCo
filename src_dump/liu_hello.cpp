@@ -34,8 +34,8 @@ Routine_t *cob;
 static void *A(void *arg)
 {
     printf("1 ");
-    // co_yield_ct(); // 切出到主协程
-    coa->yield();
+    // co_Yield_ct(); // 切出到主协程
+    coa->Yield();
     printf("2 ");
 }
 
@@ -43,8 +43,8 @@ static void *B(void *arg)
 {
     using namespace std;
     printf("x ");
-    // co_yield_ct(); // 切出到主协程
-    cob->yield();
+    // co_Yield_ct(); // 切出到主协程
+    cob->Yield();
     printf("y ");
 }
 
@@ -53,10 +53,10 @@ int main(void)
     coa = new Routine_t(get_curr_thread_env(), NULL, A, NULL);
     cob = new Routine_t(get_curr_thread_env(), NULL, B, NULL);
 
-    coa->resume();
-    cob->resume();
-    coa->resume();
-    cob->resume();
+    coa->Resume();
+    cob->Resume();
+    coa->Resume();
+    cob->Resume();
 
     // delete coa;
     // delete cob;
