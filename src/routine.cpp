@@ -60,21 +60,6 @@ void init_curr_thread_env()
 
     coctx_init(&self->ctx_);
     env->CallStack_[env->CallStackSize_++] = self;
-
-    // pid_t pid = GetTid();
-    // ArrayEnvPerThread[pid] = new RoutineEnv_t();
-    // RoutineEnv_t *env = ArrayEnvPerThread[pid];
-
-    // env->CallStackSize_ = 0;
-    // Routine_t *self = new Routine_t(env, NULL, NULL, NULL);
-    // self->IsMainRoutine_ = 1;
-
-    // env->occupy_rou_ = NULL;
-    // env->pending_rou_ = NULL;
-
-    // coctx_init(&self->ctx_);
-
-    // env->CallStack_[env->CallStackSize_++] = self;
 }
 //得到当前线程的协程环境
 RoutineEnv_t *get_curr_thread_env()
@@ -127,7 +112,6 @@ Routine_t::Routine_t(RoutineEnv_t *env, const RoutineAttr_t *attr,
 }
 Routine_t::~Routine_t()
 {
-
     //std::cout<<" Free Routine " << std::endl;
     free(stack_mem_->stack_buffer_);
     free(stack_mem_);
@@ -174,57 +158,29 @@ static int RoutineFunc(Routine_t *rou, void *)
 /*交换两个协程*/
 void Swap_two_routine(Routine_t *Current_Routine, Routine_t *Pending_Routine)
 {
-    // RoutineEnv_t *env = get_curr_thread_env();
-    // char ch;
-    // //co_swap函数里面最后一个声明的局部变量，
-    // //ch所在的内存地址就是当前栈顶地址，即ESP寄存器内保存的值
-    // curr->stack_sp_ = &ch;
-
-    // env->pending_rou_ = NULL;
-    // env->occupy_rou_ = NULL;
-
-    // //这句代码执行完成后，CPU已经切换到 pending_co
-    // coctx_swap(&(curr->ctx_), &(pending_rou->ctx_));
-    // //pending_co 退出，又回到 curr
-
-    // RoutineEnv_t *curr_env = get_curr_thread_env();
-    // Routine_t *update_occupy_co = curr_env->occupy_rou_;
-    // Routine_t *update_pending_co = curr_env->pending_rou_;
-
-    // if (update_occupy_co && update_pending_co && update_occupy_co != update_pending_co)
-    // {
-    //     // resume stack buffer
-    //     if (update_pending_co->save_buffer_ && update_pending_co->save_size_ > 0)
-    //     {
-    //         memcpy(update_pending_co->stack_sp_, update_pending_co->save_buffer_, update_pending_co->save_size_);
-    //     }
-    // }
     RoutineEnv_t *env = get_curr_thread_env();
-
-    //得到当前栈指针
-    //get curr stack sp
-    char c;
-    Current_Routine->stack_sp_ = &c;
+    char ch;
+    //co_swap函数里面最后一个声明的局部变量，
+    //ch所在的内存地址就是当前栈顶地址，即ESP寄存器内保存的值
+    Current_Routine->stack_sp_ = &ch;
 
     env->pending_rou_ = NULL;
     env->occupy_rou_ = NULL;
 
-    //swap context
+    //这句代码执行完成后，CPU已经切换到 pending_co
     coctx_swap(&(Current_Routine->ctx_), &(Pending_Routine->ctx_));
+    //pending_co 退出，又回到 curr
 
-    //防止栈内存被修改
-    //重新得到栈内存
-    //stack buffer may be overwrite, so get again;
     RoutineEnv_t *curr_env = get_curr_thread_env();
     Routine_t *update_occupy_co = curr_env->occupy_rou_;
     Routine_t *update_pending_co = curr_env->pending_rou_;
+
     if (update_occupy_co && update_pending_co && update_occupy_co != update_pending_co)
     {
-        //resume stack buffer
+        // resume stack buffer
         if (update_pending_co->save_buffer_ && update_pending_co->save_size_ > 0)
         {
-            memcpy(update_pending_co->stack_sp_, update_pending_co->save_buffer_,
-                   update_pending_co->save_size_);
+            memcpy(update_pending_co->stack_sp_, update_pending_co->save_buffer_, update_pending_co->save_size_);
         }
     }
 }
