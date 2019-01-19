@@ -58,8 +58,8 @@ int main(void)
     coa->Resume();
     cob->Resume();
 
-    // delete coa;
-    // delete cob;
+    delete coa;
+    delete cob;
 
     printf("\n");
 }

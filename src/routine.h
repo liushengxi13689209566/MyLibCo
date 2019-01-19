@@ -70,7 +70,7 @@ public:
       : occupy_routine_(NULL),
         stack_size_(stack_size)
   {
-    stack_buffer_ = (char* )malloc(stack_size);
+    stack_buffer_ = (char *)malloc(stack_size);
     stack_bp_ = stack_buffer_ + stack_size;
   }
   Routine_t *occupy_routine_; //当前协程指针
@@ -88,9 +88,21 @@ public:
 class ShareStack_t
 {
 public:
+  ShareStack_t(int count, int stack_size)
+      : alloc_idx_(0),
+        stack_size_(stack_size),
+        count_(count)
+  {
+    stack_array_ = (StackMemory_t **)calloc(count, sizeof(StackMemory_t *));
+    for (int i = 0; i < count; i++)
+    {
+      stack_array_[i] = new StackMemory_t(stack_size);
+    }
+  }
+
   unsigned int alloc_idx_;
   int stack_size_;
-  int count;
+  int count_;
   StackMemory_t **stack_array_;
 };
 // 2.Routine_t

@@ -37,9 +37,7 @@ static StackMemory_t *get_stack_form_share(ShareStack_t *share_stack);
 /********************tool function end......********************/
 
 //得到 线程ID
-static pid_t
-
-GetTid()
+static pid_t GetTid()
 {
     static __thread pid_t pid = 0;
     static __thread pid_t tid = 0; //定义一个线程局部变量很简单
@@ -167,7 +165,7 @@ static StackMemory_t *get_stack_form_share(ShareStack_t *share_stack)
     {
         return NULL;
     }
-    int idx = share_stack->alloc_idx_ % share_stack->count;
+    int idx = share_stack->alloc_idx_ % share_stack->count_;
     share_stack->alloc_idx_++;
 
     return share_stack->stack_array_[idx];
