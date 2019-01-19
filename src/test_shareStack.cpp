@@ -34,17 +34,20 @@ int main()
     ShareStack_t *share_stack = new ShareStack_t(1, 1024 * 128);
 
     // ShareStack_t *share_stack = co_alloc_sharestack(1, 1024 * 128);
-    RoutineAttr_t attr;
-    attr.stack_size_ = 0;
-    attr.share_stack_ = share_stack;
+    RoutineAttr_t attr(0, share_stack);
 
     int routineid[2];
     for (int i = 0; i < 2; i++)
     {
         routineid[i] = i;
         co[i] = new Routine_t(get_curr_thread_env(), &attr, RoutineFunc, routineid + i);
-        co[i]->Resume();
     }
     // co_eventloop(co_get_epoll_ct(), NULL, NULL);
+    while (true)
+    {
+        co[1]->Resume();
+        sleep(1);
+        co[0]->Resume();
+    }
     return 0;
 }

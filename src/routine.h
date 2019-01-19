@@ -82,6 +82,8 @@ class RoutineAttr_t
 {
 public:
   RoutineAttr_t() : stack_size_(128 * 1024), share_stack_(NULL) {}
+  RoutineAttr_t(int size, ShareStack_t *shP) : stack_size_(size), share_stack_(shP) {}
+
   int stack_size_;
   ShareStack_t *share_stack_;
 };
