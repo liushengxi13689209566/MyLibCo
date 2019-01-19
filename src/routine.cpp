@@ -53,6 +53,8 @@ static int RoutineFunc(Routine_t *rou, void *);
 /************************** copy in || copy out ****************************************/
 void save_stack_buffer(Routine_t *occupy_rou)
 {
+    std::cout << "copy out " << std::endl;
+
     StackMemory_t *stack_mem = occupy_rou->stack_mem_;
     int len = stack_mem->stack_bp_ - occupy_rou->stack_sp_;
     //如果已经保存过一次
@@ -67,6 +69,8 @@ void save_stack_buffer(Routine_t *occupy_rou)
 }
 static StackMemory_t *get_stack_form_share(ShareStack_t *share_stack)
 {
+    std::cout << "get_stack_from_share " << std::endl;
+
     if (!share_stack)
     {
         return NULL;

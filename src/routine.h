@@ -10,10 +10,8 @@
 #include <iostream>
 #include "coctx.h"
 #include "callback.h"
-
 namespace Tattoo
 {
-
 //前向声明
 class RoutineEnv_t;
 class RoutineAttr_t;
@@ -106,6 +104,10 @@ public:
   int stack_size_;
   int count_;
   StackMemory_t **stack_array_;
+};
+
+class EventLoop
+{
 };
 // 2.Routine_t
 
