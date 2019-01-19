@@ -1,6 +1,5 @@
 /*
 * Tencent is pleased to support the open source community by making Libco available.
-
 * Copyright (C) 2014 THL A29 Limited, a Tencent company. All rights reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License"); 
@@ -83,33 +82,11 @@ enum
 //64 bit
 extern "C"
 {
-    extern void coctx_swap(coctx_t *, coctx_t *) asm("coctx_swap");
+    extern void coctx_swap(Coctx_t *, Coctx_t *) asm("coctx_swap");
 };
-#if defined(__i386__)
-int coctx_init(coctx_t *ctx)
-{
-    memset(ctx, 0, sizeof(*ctx));
-    return 0;
-}
-int coctx_make(coctx_t *ctx, coctx_pfn_t pfn, const void *s, const void *s1)
-{
-    //make room for coctx_param
-    char *sp = ctx->ss_sp + ctx->ss_size - sizeof(coctx_param_t);
-    sp = (char *)((unsigned long)sp & -16L);
 
-    coctx_param_t *param = (coctx_param_t *)sp;
-    param->s1 = s;
-    param->s2 = s1;
-
-    memset(ctx->regs, 0, sizeof(ctx->regs));
-
-    ctx->regs[kESP] = (char *)(sp) - sizeof(void *);
-    ctx->regs[kEIP] = (char *)pfn;
-
-    return 0;
-}
-#elif defined(__x86_64__)
-int coctx_make(coctx_t *ctx, coctx_pfn_t pfn, const void *s, const void *s1)
+#if defined(__x86_64__)
+int Coctx_make(Coctx_t *ctx, coctx_pfn_t pfn, const void *s, const void *s1)
 {
     char *sp = ctx->ss_sp + ctx->ss_size;
     sp = (char *)((unsigned long)sp & -16LL);
@@ -126,7 +103,7 @@ int coctx_make(coctx_t *ctx, coctx_pfn_t pfn, const void *s, const void *s1)
 }
 
 //初始化coctx
-int coctx_init(coctx_t *ctx)
+int Coctx_init(Coctx_t *ctx)
 {
     memset(ctx, 0, sizeof(*ctx));
     return 0;
