@@ -1,5 +1,7 @@
 #include <functional>
 #include <memory>
+#include <poll.h>
+#include <string>
 
 class EventLoop;
 

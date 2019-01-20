@@ -1,3 +1,6 @@
+
+#include "EventLoop.h"
+
 __thread EventLoop *t_loopInThisThread = 0;
 
 const int kPollTimeMs = 10000;
@@ -19,7 +22,7 @@ class IgnoreSigPipe
   public:
     IgnoreSigPipe()
     {
-        ::signal(SIGPIPE, SIG_IGN);
+        signal(SIGPIPE, SIG_IGN);
         // LOG_TRACE << "Ignore SIGPIPE";
     }
 };

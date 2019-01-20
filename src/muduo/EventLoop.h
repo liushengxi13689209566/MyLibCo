@@ -1,7 +1,7 @@
 
+#include <functional>
 
 class Channel;
-class Poller;
 class TimerQueue;
 
 ///
