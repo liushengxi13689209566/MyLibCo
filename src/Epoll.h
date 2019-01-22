@@ -9,9 +9,8 @@
 #define _EPOLL_H
 #include <vector>
 #include <ctime>
-// #include "Channel.h"
+#include <map>
 struct epoll_event;
-
 namespace Tattoo
 {
 class EventLoop;
@@ -35,11 +34,19 @@ class Epoll
 	void fillActiveChannels(int numEvents,
 							ChannelList *activeChannels) const;
 	void update(int operation, Channel *channel);
+	//debug
+	const char *operationToString(int op);
 
   private:
+	static const int kInitEventListSize = 16;
+	typedef std::map<int, Channel *> ChannelMap;
+	ChannelMap channels_;
+
 	typedef std::vector<struct epoll_event> EventList;
 	int epollfd_;
 	EventList events_;
+
+	EventLoop *ownerLoop_;
 };
 } // namespace Tattoo
 #endif

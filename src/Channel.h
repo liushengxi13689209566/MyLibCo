@@ -45,6 +45,7 @@ class Channel : noncopyable
 
 	int getFd() const { return fd_; }
 	int getEvents() const { return events_; }
+	void set_revents(int revt) { revents_ = revt; } // used by epoll
 	bool isNoneEvent() const { return events_ == kNoneEvent; }
 
 	void enableReading()
@@ -74,6 +75,10 @@ class Channel : noncopyable
 	}
 	bool isWriting() const { return events_ & kWriteEvent; }
 	bool isReading() const { return events_ & kReadEvent; }
+
+	// for Poller
+	int getIndex() { return index_; }
+	void set_index(int idx) { index_ = idx; }
 
 	EventLoop *getEventLoop() { return loop_; }
 	void remove();
