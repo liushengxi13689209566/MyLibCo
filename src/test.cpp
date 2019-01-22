@@ -7,10 +7,13 @@
 
 #include "ServerSocket.h"
 
+#include "Time_heap.h"
+
 using namespace Tattoo;
 
 int main(void)
 {
-	int so = socket(AF_INET, SOCK_STREAM, 0);
-	ServerSocket ser(so);
+	//int so = socket(AF_INET, SOCK_STREAM, 0);
+//	ServerSocket ser(so);
+    MiniHeap  miin ;
 }

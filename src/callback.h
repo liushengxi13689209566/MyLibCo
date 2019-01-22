@@ -11,5 +11,9 @@ namespace Tattoo
 {
 //协程函数
 typedef void *(*RoutineFun)(void *);
+
+//定时器回调函数
+typedef void *(*TimerFun)(void *);
+
 } // namespace Tattoo
 #endif

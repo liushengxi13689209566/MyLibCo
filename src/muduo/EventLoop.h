@@ -2,7 +2,7 @@
 #include <functional>
 
 class Channel;
-class TimerQueue;
+// class TimerQueue;
 
 ///
 /// Reactor, at most one per thread.
@@ -32,7 +32,7 @@ class EventLoop
     ///
     /// Time when poll returns, usually means data arrival.
     ///
-    Timestamp pollReturnTime() const { return pollReturnTime_; }
+    time_t pollReturnTime() const { return pollReturnTime_; }
 
     int64_t iteration() const { return iteration_; }
 
@@ -54,22 +54,22 @@ class EventLoop
     /// Runs callback at 'time'.
     /// Safe to call from other threads.
     ///
-    TimerId runAt(Timestamp time, TimerCallback cb);
-    ///
-    /// Runs callback after @c delay seconds.
-    /// Safe to call from other threads.
-    ///
-    TimerId runAfter(double delay, TimerCallback cb);
-    ///
-    /// Runs callback every @c interval seconds.
-    /// Safe to call from other threads.
-    ///
-    TimerId runEvery(double interval, TimerCallback cb);
-    ///
-    /// Cancels the timer.
-    /// Safe to call from other threads.
-    ///
-    void cancel(TimerId timerId);
+    // TimerId runAt(time_t time, TimerCallback cb);
+    // ///
+    // /// Runs callback after @c delay seconds.
+    // /// Safe to call from other threads.
+    // ///
+    // TimerId runAfter(double delay, TimerCallback cb);
+    // ///
+    // /// Runs callback every @c interval seconds.
+    // /// Safe to call from other threads.
+    // ///
+    // TimerId runEvery(double interval, TimerCallback cb);
+    // ///
+    // /// Cancels the timer.
+    // /// Safe to call from other threads.
+    // ///
+    // void cancel(TimerId timerId);
 
     // internal usage
     void wakeup();
@@ -89,21 +89,6 @@ class EventLoop
     // bool callingPendingFunctors() const { return callingPendingFunctors_; }
     bool eventHandling() const { return eventHandling_; }
 
-    void setContext(const boost::any &context)
-    {
-        context_ = context;
-    }
-
-    const boost::any &getContext() const
-    {
-        return context_;
-    }
-
-    boost::any *getMutableContext()
-    {
-        return &context_;
-    }
-
     static EventLoop *getEventLoopOfCurrentThread();
 
   private:
@@ -121,19 +106,19 @@ class EventLoop
     bool callingPendingFunctors_; /* atomic */
     int64_t iteration_;
     const pid_t threadId_;
-    Timestamp pollReturnTime_;
-    std::unique_ptr<Poller> poller_;
-    std::unique_ptr<TimerQueue> timerQueue_;
+    time_t pollReturnTime_;
+    std::unique_ptr<Epoll> Epoll_;
+    // std::unique_ptr<TimerQueue> timerQueue_;
     int wakeupFd_;
     // unlike in TimerQueue, which is an internal class,
     // we don't expose Channel to client.
     std::unique_ptr<Channel> wakeupChannel_;
-    boost::any context_;
+    // boost::any context_;
 
     // scratch variables
     ChannelList activeChannels_;
     Channel *currentActiveChannel_;
 
-    mutable MutexLock mutex_;
-    std::vector<Functor> pendingFunctors_ GUARDED_BY(mutex_);
+    // mutable MutexLock mutex_;
+    // std::vector<Functor> pendingFunctors_ GUARDED_BY(mutex_);
 };

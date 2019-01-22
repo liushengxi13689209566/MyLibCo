@@ -1,6 +1,15 @@
 
 #include "EventLoop.h"
+#include <bits/eventfd.h>
+#include <sys/eventfd.h>
+#include <iostream>
+#include <stdlib.h>
+#include <signal.h>
 
+using namespace Tattoo;
+
+namespace
+{
 __thread EventLoop *t_loopInThisThread = 0;
 
 const int kPollTimeMs = 10000;
@@ -10,23 +19,21 @@ int createEventfd()
     int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     if (evtfd < 0)
     {
-        LOG_SYSERR << "Failed in eventfd";
+        std::cout << "Failed in eventfd" << std::endl;
         abort();
     }
     return evtfd;
 }
 
-#pragma GCC diagnostic ignored "-Wold-style-cast"
 class IgnoreSigPipe
 {
   public:
     IgnoreSigPipe()
     {
         signal(SIGPIPE, SIG_IGN);
-        // LOG_TRACE << "Ignore SIGPIPE";
+        // std::cout  << "Ignore SIGPIPE" << std::endl ;
     }
 };
-#pragma GCC diagnostic error "-Wold-style-cast"
 
 IgnoreSigPipe initObj;
 } // namespace
@@ -44,16 +51,16 @@ EventLoop::EventLoop()
       iteration_(0),
       threadId_(CurrentThread::tid()),
       poller_(Poller::newDefaultPoller(this)),
-      timerQueue_(new TimerQueue(this)),
+      //   timerQueue_(new TimerQueue(this)),
       wakeupFd_(createEventfd()),
       wakeupChannel_(new Channel(this, wakeupFd_)),
       currentActiveChannel_(NULL)
 {
-    LOG_DEBUG << "EventLoop created " << this << " in thread " << threadId_;
-    if (t_loopInThisThread)
+    std::cout << "EventLoop created " << this << " in thread " << threadId_;
+    if (t_loopInThisThread << std::endl)
     {
-        LOG_FATAL << "Another EventLoop " << t_loopInThisThread
-                  << " exists in this thread " << threadId_;
+        std::cout << "Another EventLoop " << t_loopInThisThread
+                  << " exists in this thread " << threadId_ << std::endl;
     }
     else
     {
@@ -67,8 +74,9 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
-    LOG_DEBUG << "EventLoop " << this << " of thread " << threadId_
-              << " destructs in thread " << CurrentThread::tid();
+std:
+    cout << "EventLoop " << this << " of thread " << threadId_
+         << " destructs in thread " << CurrentThread::tid() << std::endl;
     wakeupChannel_->disableAll();
     wakeupChannel_->remove();
     ::close(wakeupFd_);
@@ -81,7 +89,7 @@ void EventLoop::loop()
     assertInLoopThread();
     looping_ = true;
     quit_ = false; // FIXME: what if someone calls quit() before loop() ?
-    LOG_TRACE << "EventLoop " << this << " start looping";
+    std::cout << "EventLoop " << this << " start looping" << std::endl;
 
     while (!quit_)
     {
@@ -104,7 +112,7 @@ void EventLoop::loop()
         doPendingFunctors();
     }
 
-    LOG_TRACE << "EventLoop " << this << " stop looping";
+    std::cout << "EventLoop " << this << " stop looping" << std::endl;
     looping_ = false;
 }
 
@@ -201,8 +209,8 @@ bool EventLoop::hasChannel(Channel *channel)
 
 void EventLoop::abortNotInLoopThread()
 {
-    LOG_FATAL << "EventLoop::abortNotInLoopThread - EventLoop " << this
-              << " was created in threadId_ = " << threadId_
+    std::cout << "EventLoop::abortNotInLoopThread - EventLoop " << this
+              << " was created in threadId_ = " << threadId _
               << ", current thread id = " << CurrentThread::tid();
 }
 
@@ -247,6 +255,6 @@ void EventLoop::printActiveChannels() const
 {
     for (const Channel *channel : activeChannels_)
     {
-        LOG_TRACE << "{" << channel->reventsToString() << "} ";
+        std::cout << "{" << channel->reventsToString() << "} " << std::endl;
     }
 }
