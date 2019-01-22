@@ -7,4 +7,23 @@
 
 #ifndef _POLLER_H
 #define _POLLER_H
+#include "Time_heap.h"
+
+namespace Tattoo
+{
+class Poller
+{
+  public:
+	Poller(TimerFun timefun, void *arg, int delay);
+	~Poller();
+
+  private:
+	MiniHeap *miniheap_;
+	TimerFun timerCallback_;
+	void *arg_;
+	int delay_;
+};
+
+} // namespace Tattoo
+
 #endif

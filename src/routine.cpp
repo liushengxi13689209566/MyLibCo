@@ -48,6 +48,7 @@ static pid_t GetTid();
 /*协程中要执行的函数,该函数会调用回调函数,并退出当前协程*/
 static int RoutineFunc(Routine_t *rou, void *);
 
+Routine_t *get_curr_routine();
 /********************tool function end......********************/
 
 /************************** copy in || copy out ****************************************/
@@ -242,5 +243,10 @@ static int RoutineFunc(Routine_t *rou, void *)
     RoutineEnv_t *env = rou->env_;
     yield_env(env);
     return 0;
+}
+Routine_t *get_curr_routine()
+{
+    RoutineEnv_t *env = get_curr_thread_env();
+    return env->CallStack_[env->CallStackSize_ - 1];
 }
 } // namespace Tattoo

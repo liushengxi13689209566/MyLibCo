@@ -10,43 +10,48 @@
 #include <vector>
 #include <ctime>
 #include <map>
-struct epoll_event;
+#include "callback.h"
+#include "Time_heap.h"
+
 namespace Tattoo
 {
-class EventLoop;
-class Channel;
-
 // 类似于　　stCoEpoll_t *pEpoll;　结构　
 //这里的网络模型架构我还是想采取　
 // 一个线程一个事件循环 一个线程里面再有指定数量的协程去处理所到的事件
-class Epoll
+
+class TimerEpolls;
+
+class TimerEvent : public Timer
 {
-	typedef std::vector<Channel *> ChannelList;
-
   public:
-	Epoll(EventLoop *loop);
-	~Epoll();
-
-	time_t pool(int timeoutMs, ChannelList *activeChannels);
-	void updateChannel(Channel *channel);
-	void removeChannel(Channel *channel);
-
-	void fillActiveChannels(int numEvents,
-							ChannelList *activeChannels) const;
-	void update(int operation, Channel *channel);
-	//debug
-	const char *operationToString(int op);
+  private:
+	int selffd_;
+	EpollCallback epollCallback;
+	TimerEpolls *timee_epolls_;
+	struct epoll_event env_;
+};
+class TimerEpolls : public Timer
+{
+  public:
+	TimerEpolls();
+	TimerEpolls(
+		TimerFun timerCallback, void *arg,
+		int delay, unsigned long long evsNum, int epfd,
+		struct epoll_event *revents);
+	~TimerEpolls();
 
   private:
-	static const int kInitEventListSize = 16;
-	typedef std::map<int, Channel *> ChannelMap;
-	ChannelMap channels_;
+};
+class Epoll
+{
+  public:
+	Epoll();
+	~Epoll();
 
-	typedef std::vector<struct epoll_event> EventList;
+  private:
+	static const int kInitEventListSize = 1024 * 10;
+	struct epoll_event *eventList;
 	int epollfd_;
-	EventList events_;
-
-	EventLoop *ownerLoop_;
 };
 } // namespace Tattoo
 #endif
