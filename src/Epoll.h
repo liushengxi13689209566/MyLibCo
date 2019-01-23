@@ -41,6 +41,11 @@ class TimerEpolls : public Timer
 	~TimerEpolls();
 
   private:
+	int epfd_;
+	struct epoll_event;
+	unsigned long long evsNum_;
+	int RaiseNum_;
+	bool isOutTime_;
 };
 class Epoll
 {

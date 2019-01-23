@@ -21,6 +21,7 @@ public:
 	~EventLoop();
 
 private:
+	
 };
 } // namespace Tattoo
 
