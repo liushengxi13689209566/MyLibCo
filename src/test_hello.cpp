@@ -33,29 +33,36 @@ Routine_t *cob;
 
 static void *A(void *arg)
 {
-    printf("1 \n");
-    // co_yield_ct(); // 切出到主协程
-    coa->Yield();
-    printf("2 \n");
+    for (int i = 0; i < 10; i++)
+    {
+        std::cout << "coroutine : " << *(int *)arg + i << std::endl;
+        coa->Yield();
+    }
+    return NULL;
 }
 
 static void *B(void *arg)
 {
-    printf("x \n");
-    // co_yield_ct(); // 切出到主协程
-    cob->Yield();
-    printf("y \n");
+    for (int i = 0; i < 10; i++)
+    {
+        std::cout << "coroutine : " << *(int *)arg + i << std::endl;
+        cob->Yield();
+    }
+    return NULL;
 }
 
 int main(void)
 {
-    coa = new Routine_t(get_curr_thread_env(), NULL, A, NULL);
-    cob = new Routine_t(get_curr_thread_env(), NULL, B, NULL);
-
-    coa->Resume();
-    cob->Resume();
-    coa->Resume();
-    cob->Resume();
+    int t1 = 1;
+    int t2 = 4;
+    coa = new Routine_t(get_curr_thread_env(), NULL, A, &t1);
+    cob = new Routine_t(get_curr_thread_env(), NULL, B, &t2);
+    for (int i = 0; i < 10; i++)
+    {
+        coa->Resume();
+        cob->Resume();
+        std::cout << std::endl;
+    }
 
     delete coa;
     delete cob;

@@ -56,12 +56,18 @@ public:
 class RoutineEnv_t
 {
 public:
-  RoutineEnv_t() : CallStackSize_(0), pending_rou_(NULL), occupy_rou_(NULL) {}
+  RoutineEnv_t() : CallStackSize_(0), pending_rou_(NULL), occupy_rou_(NULL)
+  {
+  }
+  ~RoutineEnv_t()
+  {
+    free(epoll_);
+  }
   Routine_t *CallStack_[128]; //用于保存当前线程中的协程　　
   int CallStackSize_;         //相当于栈指针
 
-  Epoll *epoll_;
-  MiniHeap *time_heap_;
+  class Epoll *epoll_;
+  class MiniHeap *time_heap_;
 
   Routine_t *pending_rou_;
   Routine_t *occupy_rou_;
@@ -116,6 +122,34 @@ public:
 // 3. ShareStack_t
 
 // error:debug
+//存储对应于每一个线程的 RoutineEnv_t 结构
+static RoutineEnv_t *ArrayEnvPerThread[204800] = {0};
+
+/********************tool function******************************/
+//-----------------> copy in || copy out
+
+//----------------->swap two routine
+/*交换两个协程*/
+void Swap_two_routine(Routine_t *curr, Routine_t *pending_rou);
+
+//----------------->about Routine_t
+//初始化当前线程的协程环境
+void init_curr_thread_env();
+//得到当前线程的协程环境
+RoutineEnv_t *get_curr_thread_env();
+
+/*挂起当前的co_routine，切换到上一个co_routine，
+将当前的co_routine设置为上一个co_routine*/
+void yield_env(RoutineEnv_t *env);
+
+//-----------------> other
+//得到 线程ID
+static pid_t GetTid();
+/*协程中要执行的函数,该函数会调用回调函数,并退出当前协程*/
+static int RoutineFunc(Routine_t *rou, void *);
+
+Routine_t *get_curr_routine();
+/********************tool function end......********************/
 
 } // namespace Tattoo
 

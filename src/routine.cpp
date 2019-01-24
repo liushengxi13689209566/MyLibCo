@@ -18,35 +18,6 @@ extern "C"
     extern void coctx_swap(Coctx_t *, Coctx_t *) asm("coctx_swap");
 };
 
-//存储对应于每一个线程的 RoutineEnv_t 结构
-static RoutineEnv_t *ArrayEnvPerThread[204800] = {0};
-
-/********************tool function******************************/
-//-----------------> copy in || copy out
-
-//----------------->swap two routine
-/*交换两个协程*/
-void Swap_two_routine(Routine_t *curr, Routine_t *pending_rou);
-
-//----------------->about Routine_t
-//初始化当前线程的协程环境
-void init_curr_thread_env();
-//得到当前线程的协程环境
-RoutineEnv_t *get_curr_thread_env();
-
-/*挂起当前的co_routine，切换到上一个co_routine，
-将当前的co_routine设置为上一个co_routine*/
-void yield_env(RoutineEnv_t *env);
-
-//-----------------> other
-//得到 线程ID
-static pid_t GetTid();
-/*协程中要执行的函数,该函数会调用回调函数,并退出当前协程*/
-static int RoutineFunc(Routine_t *rou, void *);
-
-Routine_t *get_curr_routine();
-/********************tool function end......********************/
-
 /************************** copy in || copy out ****************************************/
 
 /************************** swap two routine ****************************************/
@@ -91,6 +62,7 @@ void init_curr_thread_env()
     env->CallStack_[env->CallStackSize_++] = self;
 
     env->time_heap_ = new MiniHeap();
+    env->epoll_ = new Epoll();
 }
 RoutineEnv_t *get_curr_thread_env()
 {
@@ -189,6 +161,7 @@ static int RoutineFunc(Routine_t *rou, void *)
 }
 Routine_t *get_curr_routine()
 {
+    std::cout << "get_curr_routine" << std::endl;
     RoutineEnv_t *env = get_curr_thread_env();
     return env->CallStack_[env->CallStackSize_ - 1];
 }

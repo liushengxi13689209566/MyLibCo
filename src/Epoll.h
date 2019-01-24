@@ -24,11 +24,11 @@ class TimerEpolls;
 //针对于每个epoll_event
 class TimerEvent : public Timer
 {
-  public:
+public:
 	TimerEvent() {}
 	~TimerEvent() {}
 
-  public:
+public:
 	int selffd_;
 	EpollCallback epollCallback_;
 	TimerEpolls *timer_epolls_;
@@ -37,12 +37,12 @@ class TimerEvent : public Timer
 //epoll定时器
 class TimerEpolls : public Timer
 {
-  public:
-	TimerEpolls() {}
+public:
+	TimerEpolls();
 	TimerEpolls(
-		TimerFun timerCallback, void *arg,
-		int delay, unsigned long long evsNum, int epfd,
-		struct epoll_event *revents);
+			TimerFun timerCallback, void *arg,
+			int delay, unsigned long long evsNum, int epfd,
+			struct epoll_event *revents);
 	~TimerEpolls();
 
 	int epfd_;
@@ -54,7 +54,7 @@ class TimerEpolls : public Timer
 };
 class EpollRes
 {
-  public:
+public:
 	EpollRes(int size) : size_(size)
 	{
 		events_ = (struct epoll_event *)calloc(1, size_ * sizeof(struct epoll_event));
@@ -68,12 +68,16 @@ class EpollRes
 };
 class Epoll
 {
-  public:
-	Epoll();
-	~Epoll();
+public:
+	Epoll()
+	{
+		epollfd_ = ::epoll_create(kInitEventListSize);
+		result_ = new EpollRes(kInitEventListSize);
+	}
+	~Epoll() {}
 	int addEpoll(struct epoll_event *evs, unsigned long long evNum,
-				 struct epoll_event *revents, int timeout,
-				 unsigned long long maxNum = 1024 * 10);
+							 struct epoll_event *revents, int timeout,
+							 unsigned long long maxNum = 1024 * 10);
 
 	static const int kInitEventListSize = 1024 * 10;
 	struct epoll_event *eventList;

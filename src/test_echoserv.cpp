@@ -17,7 +17,6 @@
 #include <stack>
 #include <iostream>
 #include "routine.h"
-// #include "routine.cpp"
 #include "Time_heap.h"
 #include "EventLoop.h"
 #include "Poller.h"
@@ -144,17 +143,6 @@ static void *accept_routine(void *)
     for (;;)
     {
         std::cout << "accepter ::" << std::endl;
-        if (g_readwrite.empty())
-        {
-            std::cout << "There is no routine to read socket! " << std::endl;
-            struct epoll_event ev;
-            ev.data.fd = -1;
-            ev.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
-            struct epoll_event revents[10];
-            int epollret = get_curr_thread_env()->epoll_->addEpoll(&ev, 1, revents, 10);
-            continue;
-        }
-
         struct sockaddr_in addr; //maybe sockaddr_un;
         memset(&addr, 0, sizeof(addr));
         socklen_t len = sizeof(addr);
@@ -166,7 +154,12 @@ static void *accept_routine(void *)
             ev.data.fd = g_listen_fd;
             ev.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
             struct epoll_event revents[10];
+            std::cout << __FUNCTION__ << " : " << __LINE__ << " a New Connection !" << std::endl;
+
             int epollret = get_curr_thread_env()->epoll_->addEpoll(&ev, 1, revents, 10);
+
+            std::cout << __FUNCTION__ << " : " << __LINE__ << " add epoll success " << std::endl;
+
             continue;
         }
         if (g_readwrite.empty())
