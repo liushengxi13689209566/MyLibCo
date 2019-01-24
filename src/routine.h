@@ -18,7 +18,7 @@ namespace Tattoo
 class RoutineEnv_t;
 class RoutineAttr_t;
 class StackMemory_t;
-class ShareStack_t;
+// class ShareStack_t;
 
 class Routine_t
 {
@@ -84,32 +84,32 @@ public:
 class RoutineAttr_t
 {
 public:
-  RoutineAttr_t() : stack_size_(128 * 1024), share_stack_(NULL) {}
-  RoutineAttr_t(int size, ShareStack_t *shP) : stack_size_(size), share_stack_(shP) {}
+  RoutineAttr_t() : stack_size_(128 * 1024) {}
+  // RoutineAttr_t(int size, ShareStack_t *shP) : stack_size_(size), share_stack_(shP) {}
 
   int stack_size_;
-  ShareStack_t *share_stack_;
+  // ShareStack_t *share_stack_;
 };
-class ShareStack_t
-{
-public:
-  ShareStack_t(int count, int stack_size)
-      : alloc_idx_(0),
-        stack_size_(stack_size),
-        count_(count)
-  {
-    stack_array_ = (StackMemory_t **)calloc(count, sizeof(StackMemory_t *));
-    for (int i = 0; i < count; i++)
-    {
-      stack_array_[i] = new StackMemory_t(stack_size);
-    }
-  }
+// class ShareStack_t
+// {
+// public:
+//   ShareStack_t(int count, int stack_size)
+//       : alloc_idx_(0),
+//         stack_size_(stack_size),
+//         count_(count)
+//   {
+//     stack_array_ = (StackMemory_t **)calloc(count, sizeof(StackMemory_t *));
+//     for (int i = 0; i < count; i++)
+//     {
+//       stack_array_[i] = new StackMemory_t(stack_size);
+//     }
+//   }
 
-  unsigned int alloc_idx_;
-  int stack_size_;
-  int count_;
-  StackMemory_t **stack_array_;
-};
+//   unsigned int alloc_idx_;
+//   int stack_size_;
+//   int count_;
+//   StackMemory_t **stack_array_;
+// };
 
 // 2.Routine_t
 
