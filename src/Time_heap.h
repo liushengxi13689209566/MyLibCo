@@ -18,6 +18,7 @@ namespace Tattoo
 class Timer
 {
   public:
+	Timer() {}
 	Timer(TimerFun timefun, void *arg, int delay)
 		: timerCallback_(timefun),
 		  arg_(arg)
@@ -88,7 +89,7 @@ class MiniHeap
 			{
 				if (tt->timerCallback_)
 				{
-					tt->timerCallback_(tt->arg_);
+					tt->timerCallback_((Routine_t *)tt->arg_);
 					/*执行完就把他从队列中删除*/
 					que.pop();
 				}

@@ -7,13 +7,17 @@
 
 #ifndef _CALLBACK_H
 #define _CALLBACK_H
+#include "routine.h"
+
 namespace Tattoo
 {
+class Routine_t;
+
 //协程函数
 typedef void *(*RoutineFun)(void *);
 
 //定时器回调函数
-typedef void *(*TimerFun)(void *);
+typedef void *(*TimerFun)(Routine_t *);
 
 //eventloop
 typedef void *(*EpollCallback)(void *);

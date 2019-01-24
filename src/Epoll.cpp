@@ -27,7 +27,7 @@ static void *epollCallback(void *arg)
     {
         timer_epolls->isOutTime_ = 1;
         TimerEpolls *timerNew = new TimerEpolls();
-        memcpy(timerNew, timer_epolls, sizeof(timer_epolls));
+        memcpy(timerNew, timer_epolls, sizeof(TimerEpolls));
         timerNew->expire_ = time(NULL) + 1;
 
         get_curr_thread_env()->time_heap_->AddTimer(timerNew);
@@ -92,8 +92,8 @@ int Epoll::addEpoll(struct epoll_event *evs, unsigned long long evNum,
         if (evs->data.fd < 0)
             continue;
 
-        int ret = epoll_ctl(epollFd_, EPOLL_CTL_DEL, arg->timer_Epoll_[i].selfFd_,
-                            &arg->timer_Epoll_[i].env_);
+        int ret = epoll_ctl(epollfd_, EPOLL_CTL_DEL, arg->timer_event_[i].selffd_,
+                            &arg->timer_event_[i].env_);
         assert(ret == 0);
     }
     return arg->RaiseNum_;
