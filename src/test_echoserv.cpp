@@ -1,3 +1,5 @@
+//test for Server
+
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/epoll.h>
@@ -12,19 +14,27 @@
 #include <stdlib.h>
 #include <queue>
 #include <vector>
+#include <stack>
 #include <iostream>
 #include "routine.h"
-#include "routine.cpp"
+// #include "routine.cpp"
 #include "Time_heap.h"
+#include "EventLoop.h"
 #include "Poller.h"
 #include "Poller.cpp"
-// #include "Log.h"
+#include "Log.h"
 #include "Epoll.h"
 #include "Epoll.cpp"
 #include "callback.h"
-#include "EventLoop.h"
-
 using namespace Tattoo;
+
+struct task
+{
+    Routine_t *routine;
+    int fd;
+};
+static std::stack<task *> g_readwrite;
+static int g_listen_fd = -1;
 
 //设置非阻塞Socket
 static int SetNonBlock(int iSock)
@@ -81,59 +91,135 @@ static int CreateTcpSocket(const unsigned short shPort = 0, const char *pszIP = 
     }
     return fd;
 }
-void *Poll(void *arg)
+
+static void *readwrite_routine(void *arg)
 {
-    int backlog;
-    int portnumber = 12349;
-    int listenfd = socket(AF_INET, SOCK_STREAM, 0);
-
-    char *local_addr = "127.0.0.1";
-    struct sockaddr_in serveraddr;
-    serveraddr.sin_family = AF_INET;
-    inet_aton(local_addr, &(serveraddr.sin_addr)); //htons(portnumber);
-    serveraddr.sin_port = htons(portnumber);
-
-    struct epoll_event ev;
-    ev.data.fd = listenfd;
-    ev.events = EPOLLIN | EPOLLET;
-
-    bind(listenfd, (sockaddr *)&serveraddr, sizeof(serveraddr));
-    listen(listenfd, backlog);
-
-    struct epoll_event revents[1000];
-    while (1)
+    task *tsk = (task *)arg;
+    char buf[1024 * 10];
+    for (;;)
     {
-        ev.data.fd = listenfd;
-        ev.events = EPOLLIN | EPOLLET;
-        int ret = get_curr_thread_env()->epoll_->addEpoll(&ev, 1, revents, 100);
+        //当本协程没有监听Socket是，把其放入协程等待队列
+        if (tsk->fd == -1)
+        {
+            g_readwrite.push(tsk);
+            get_curr_routine()->Yield();
+        }
+
+        //设置为-1表示已读，方便协程下次循环退出
+        int fd = tsk->fd;
+        tsk->fd = -1;
+
+        struct epoll_event revents[1000];
+        //不断监听
+        //不断循环等待，等待读取信息
+        for (;;)
+        {
+            struct epoll_event env;
+            env.data.fd = fd;
+            env.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
+            int epollret = get_curr_thread_env()->epoll_->addEpoll(&env, 1, revents, 10);
+            if (epollret == 0)
+            {
+                continue;
+            }
+
+            int ret = read(fd, buf, sizeof(buf));
+            if (ret > 0)
+            {
+                std::cout << __FUNCTION__ << __LINE__ << "ret : " << ret << std::endl;
+                std::cout << __FUNCTION__ << __LINE__ << "message :: " << buf << std::endl;
+                //ret = write( fd,buf,ret );
+            }
+            else
+            {
+                close(fd);
+                break;
+            }
+        }
+    }
+}
+
+static void *accept_routine(void *)
+{
+    for (;;)
+    {
+        std::cout << "accepter ::" << std::endl;
+        if (g_readwrite.empty())
+        {
+            std::cout << "There is no routine to read socket! " << std::endl;
+            struct epoll_event ev;
+            ev.data.fd = -1;
+            ev.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
+            struct epoll_event revents[10];
+            int epollret = get_curr_thread_env()->epoll_->addEpoll(&ev, 1, revents, 10);
+            continue;
+        }
 
         struct sockaddr_in addr; //maybe sockaddr_un;
         memset(&addr, 0, sizeof(addr));
         socklen_t len = sizeof(addr);
+        int fd = accept(g_listen_fd, (struct sockaddr *)&addr, &len);
 
-        for (int i = 0; i < ret; i++)
+        if (fd < 0)
         {
-            std::cout << revents[i].data.fd << std::endl;
+            struct epoll_event ev;
+            ev.data.fd = g_listen_fd;
+            ev.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
+            struct epoll_event revents[10];
+            int epollret = get_curr_thread_env()->epoll_->addEpoll(&ev, 1, revents, 10);
+            continue;
         }
-        std::cout << "I'm back!" << std::endl;
+        if (g_readwrite.empty())
+        {
+            close(fd);
+            continue;
+        }
 
-        int fd = accept(listenfd, (struct sockaddr *)&addr, &len);
-        std::cout << "Accept::fd " << fd << std::endl;
-        char buf[1000];
-        int rett = read(fd, buf, sizeof(buf));
-        std::cout << "Size :" << rett << " message :" << buf << std::endl;
+        SetNonBlock(fd);
+        std::cout << __FUNCTION__ << " a New Connection !" << std::endl;
+        //accept完后启动其他协程
+
+        //取出最顶端的空闲协程执行对应的fd读写
+        task *tsk = g_readwrite.top();
+        tsk->fd = fd;
+        tsk->routine->Resume();
+        g_readwrite.pop();
     }
 }
 
+//典型的Reactor模式
+
 int main()
 {
+    int backlog;
+    int portnumber = 12349;
+    char *local_addr = "127.0.0.1";
+
+    g_listen_fd = CreateTcpSocket(portnumber, local_addr, true);
+    listen(g_listen_fd, 1024);
+
+    SetNonBlock(g_listen_fd);
+
+    //在每个进程中创建协程
     std::vector<Routine_t *> Routine_tArr;
-    Routine_tArr.push_back(new Routine_t(get_curr_thread_env(), NULL, Poll, NULL));
-    for (int i = 0; i < 1; i++)
+    int number = 10;
+
+    for (int i = 0; i < number; i++)
+    {
+        task *tsk = (task *)calloc(1, sizeof(task));
+        tsk->fd = -1;
+        Routine_tArr.push_back(new Routine_t(get_curr_thread_env(), NULL, readwrite_routine, tsk));
+        tsk->routine = Routine_tArr[i];
+    }
+
+    for (int i = 0; i < number; i++)
     {
         Routine_tArr[i]->Resume();
     }
-    std::cout << "I'm Main routine" << std::endl;
+
+    Routine_t *accepter = (new Routine_t(get_curr_thread_env(), NULL, accept_routine, NULL));
+    accepter->Resume();
+
     EventLoop eventloop(get_curr_thread_env()->time_heap_, NULL, NULL);
     eventloop.loop();
     return 0;

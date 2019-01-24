@@ -3,7 +3,7 @@
 // #include "Log.h"
 #include <sys/epoll.h>
 #include <assert.h>
-
+#include "routine.cpp"
 using namespace Tattoo;
 
 static void *timerCallback(Routine_t *rou)
@@ -65,7 +65,7 @@ int Epoll::addEpoll(struct epoll_event *evs, unsigned long long evNum,
                     struct epoll_event *revents, int timeout,
                     unsigned long long maxNum)
 {
-    TimerEpolls *arg = new TimerEpolls(timerCallback, get_curr_routine(), timeout, evNum, epollfd_, revents);
+    TimerEpolls *arg = new TimerEpolls(timerCallback, (void *)get_curr_routine(), timeout, evNum, epollfd_, revents);
     for (unsigned long long i = 0; i < evNum; i++)
     {
         //初始化timerEvent的信息
