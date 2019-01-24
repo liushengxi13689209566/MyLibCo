@@ -15,7 +15,9 @@ typedef void *(*RoutineFun)(void *);
 //定时器回调函数
 typedef void *(*TimerFun)(void *);
 
+//eventloop
 typedef void *(*EpollCallback)(void *);
+typedef void *(*EventLoopFun)(void *);
 
 } // namespace Tattoo
 #endif

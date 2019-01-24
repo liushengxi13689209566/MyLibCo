@@ -19,12 +19,11 @@
 #include "Time_heap.cpp"
 #include "Poller.h"
 #include "Poller.cpp"
-#include "Conditional_variable.cpp"
-#include "Conditional_variable.h"
 #include "Log.h"
 #include "Epoll.h"
 #include "Epoll.cpp"
-#include "Callback.h"
+#include "callback.h"
+#include "EventLoop.h"
 
 using namespace Tattoo;
 
@@ -84,10 +83,10 @@ static int CreateTcpSocket(const unsigned short shPort = 0, const char *pszIP = 
     return fd;
 }
 
-void *timerCallback(Routine *routine)
+void *timerCallback(Routine_t *routine)
 {
-    //std::cout<<"I'm timerCallback Function. I will resume this routine!\n"<<std::endl;
-    routine->resume();
+    //std::cout<<"I'm timerCallback Function. I will Resume this routine!\n"<<std::endl;
+    routine->Resume();
 }
 
 void *Poll(void *arg)
@@ -136,11 +135,11 @@ void *Poll(void *arg)
 
 int main()
 {
-    std::vector<Routine *> RoutineArr;
-    RoutineArr.push_back(new Routine(get_curr_thread_env(), NULL, Poll, NULL));
+    std::vector<Routine_t *> Routine_tArr;
+    Routine_tArr.push_back(new Routine_t(get_curr_thread_env(), NULL, Poll, NULL));
     for (int i = 0; i < 1; i++)
     {
-        RoutineArr[i]->resume();
+        Routine_tArr[i]->Resume();
     }
     std::cout << "I'm Main routine" << std::endl;
     EventLoop eventloop(get_curr_thread_env()->time_heap_, NULL, NULL);

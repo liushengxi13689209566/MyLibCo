@@ -44,7 +44,7 @@ class MiniHeap
 	~MiniHeap(){};
 
 	/*添加定时器*/
-	void AddTimer(const TimerPtr &timer)
+	void AddTimer(TimerPtr timer)
 	{
 		if (!timer)
 			return;
@@ -61,7 +61,7 @@ class MiniHeap
 			return;
 		que.pop();
 	}
-	time_t TopTime()
+	time_t TopTimer()
 	{
 		if (que.size() == 0)
 			return 5;

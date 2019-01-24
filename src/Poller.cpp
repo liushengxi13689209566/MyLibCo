@@ -13,7 +13,7 @@ Poller::Poller(TimerFun timefun, void *arg, int delay)
     if (delay_ < 0)
         delay_ = 1e9;
     miniheap_->AddTimer(timerCallback_, arg_, delay_);
-    get_curr_routine()->yield();
+    get_curr_routine()->Yield();
 }
 
 Poller::~Poller() {}

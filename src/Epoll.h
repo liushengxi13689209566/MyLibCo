@@ -12,6 +12,7 @@
 #include <map>
 #include "callback.h"
 #include "Time_heap.h"
+#include <sys/epoll.h>
 
 namespace Tattoo
 {
@@ -21,15 +22,20 @@ namespace Tattoo
 
 class TimerEpolls;
 
+//针对于每个epoll_event
 class TimerEvent : public Timer
 {
   public:
-  private:
+	TimerEvent() {}
+	~TimerEvent() {}
+
+  public:
 	int selffd_;
-	EpollCallback epollCallback;
-	TimerEpolls *timee_epolls_;
+	EpollCallback epollCallback_;
+	TimerEpolls *timer_epolls_;
 	struct epoll_event env_;
 };
+//epoll定时器
 class TimerEpolls : public Timer
 {
   public:
@@ -40,23 +46,40 @@ class TimerEpolls : public Timer
 		struct epoll_event *revents);
 	~TimerEpolls();
 
-  private:
 	int epfd_;
-	struct epoll_event;
+	struct epoll_event *revents_;
 	unsigned long long evsNum_;
 	int RaiseNum_;
 	bool isOutTime_;
+	TimerEvent *timer_event_;
+};
+class EpollRes
+{
+  public:
+	EpollRes(int size) : size_(size)
+	{
+		events_ = (struct epoll_event *)calloc(1, size_ * sizeof(struct epoll_event));
+	}
+	~EpollRes()
+	{
+		delete events_;
+	}
+	int size_;
+	struct epoll_event *events_;
 };
 class Epoll
 {
   public:
 	Epoll();
 	~Epoll();
+	int addEpoll(struct epoll_event *evs, unsigned long long evNum,
+				 struct epoll_event *revents, int timeout,
+				 unsigned long long maxNum = 1024 * 10);
 
-  private:
 	static const int kInitEventListSize = 1024 * 10;
 	struct epoll_event *eventList;
 	int epollfd_;
+	class EpollRes *result_;
 };
 } // namespace Tattoo
 #endif

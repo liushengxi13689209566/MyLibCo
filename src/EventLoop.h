@@ -7,7 +7,9 @@
 
 #ifndef _EVENTLOOP_H
 #define _EVENTLOOP_H
-#include "noncopyable.h"
+
+#include "callback.h"
+#include "Time_heap.h"
 
 // 这是Reactor模式的核心，每个Reactor线程内部调用一个EventLoop，
 // 内部不停的进行poll或者epoll_wait调用，然后根据fd的返回事件，
@@ -16,12 +18,16 @@ namespace Tattoo
 {
 class EventLoop
 {
-public:
-	EventLoop();
+  public:
+	EventLoop(MiniHeap *time_heap, EventLoopFun fun, void *arg);
 	~EventLoop();
+	void loop();
+	void runInLoop();
 
-private:
-	
+	EventLoopFun runInLoopFunction_;
+	void *arg_;
+
+	MiniHeap *time_heap_;
 };
 } // namespace Tattoo
 

@@ -10,6 +10,8 @@
 #include <iostream>
 #include "coctx.h"
 #include "callback.h"
+#include "Time_heap.h"
+#include "Epoll.h"
 namespace Tattoo
 {
 //前向声明
@@ -59,6 +61,7 @@ public:
   int CallStackSize_;         //相当于栈指针
 
   Epoll *epoll_;
+  MiniHeap *time_heap_;
 
   Routine_t *pending_rou_;
   Routine_t *occupy_rou_;
@@ -108,9 +111,6 @@ public:
   StackMemory_t **stack_array_;
 };
 
-class EventLoop
-{
-};
 // 2.Routine_t
 
 // 3. ShareStack_t
