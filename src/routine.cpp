@@ -90,7 +90,7 @@ void Swap_two_routine(Routine_t *curr, Routine_t *pending_rou)
     //co_swap函数里面最后一个声明的局部变量，
     //ch所在的内存地址就是当前栈顶地址，即ESP寄存器内保存的值
     curr->stack_sp_ = &ch;
-    if (!pending_rou->IsShareStack)
+    if (!pending_rou->IsShareStack_)
     {
         env->pending_rou_ = NULL;
         env->occupy_rou_ = NULL;
@@ -141,6 +141,8 @@ void init_curr_thread_env()
 
     Coctx_init(&self->ctx_);
     env->CallStack_[env->CallStackSize_++] = self;
+
+    env->time_heap_ = new MiniHeap();
 }
 RoutineEnv_t *get_curr_thread_env()
 {
@@ -157,10 +159,10 @@ Routine_t::Routine_t(RoutineEnv_t *env, const RoutineAttr_t *attr,
     : env_(env),
       pfn_(pfn),
       arg_(arg),
-      IsRun_(false),
-      IsDead_(false),
-      IsMainRoutine_(false),
-      EnableSysHook(0)
+      start_(0),
+      end_(0),
+      IsMainRoutine_(0),
+      EnableSysHook_(0)
 {
     RoutineAttr_t at;
     if (attr)
@@ -193,6 +195,8 @@ Routine_t::Routine_t(RoutineEnv_t *env, const RoutineAttr_t *attr,
     stack_mem_ = stack_mem;
     ctx_.ss_sp = stack_mem->stack_buffer_;
     ctx_.ss_size = stack_mem->stack_size_;
+    IsShareStack_ = at.share_stack_ != NULL;
+
     save_size_ = 0;
     save_buffer_ = NULL;
     // std::cout << "创建一个协程　" << std::endl;
@@ -200,10 +204,10 @@ Routine_t::Routine_t(RoutineEnv_t *env, const RoutineAttr_t *attr,
 void Routine_t::Resume()
 {
     Routine_t *curr_routine = env_->CallStack_[env_->CallStackSize_ - 1];
-    if (!IsRun_)
+    if (!start_)
     {
         Coctx_make(&ctx_, (coctx_pfn_t)RoutineFunc, this, 0);
-        IsRun_ = true;
+        start_ = 1;
     }
     env_->CallStack_[env_->CallStackSize_++] = this;
     Swap_two_routine(curr_routine, this);
@@ -218,7 +222,7 @@ void yield_env(RoutineEnv_t *env)
     Routine_t *last = env->CallStack_[env->CallStackSize_ - 2];
     Routine_t *curr = env->CallStack_[env->CallStackSize_ - 1];
     env->CallStackSize_--;
-    curr->IsRun_ = false;
+    curr->start_ = false;
     Swap_two_routine(curr, last);
 }
 /************************** other ********************************************/
@@ -239,7 +243,7 @@ static int RoutineFunc(Routine_t *rou, void *)
     {
         rou->pfn_(rou->arg_);
     }
-    rou->IsDead_ = true;
+    rou->end_ = 1;
     RoutineEnv_t *env = rou->env_;
     yield_env(env);
     return 0;

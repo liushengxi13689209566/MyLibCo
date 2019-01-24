@@ -33,19 +33,18 @@ Routine_t *cob;
 
 static void *A(void *arg)
 {
-    printf("1 ");
+    printf("1 \n");
     // co_yield_ct(); // 切出到主协程
     coa->Yield();
-    printf("2 ");
+    printf("2 \n");
 }
 
 static void *B(void *arg)
 {
-    using namespace std;
-    printf("x ");
+    printf("x \n");
     // co_yield_ct(); // 切出到主协程
     cob->Yield();
-    printf("y ");
+    printf("y \n");
 }
 
 int main(void)

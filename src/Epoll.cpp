@@ -1,7 +1,6 @@
 
 #include "Epoll.h"
-#include "Log.h"
-#include "routine.h"
+// #include "Log.h"
 #include <sys/epoll.h>
 #include <assert.h>
 
@@ -15,14 +14,14 @@ static void *timerCallback(Routine_t *rou)
 //epoll 产生事件时，唤醒 TimerEpolls
 static void *epollCallback(void *arg)
 {
-    LOG("Tattoo");
+    // LOG("Tattoo");
     TimerEvent *timer_event = (TimerEvent *)arg;
     TimerEpolls *timer_epolls = timer_event->timer_epolls_;
 
     timer_epolls->revents_[timer_epolls->RaiseNum_] = timer_event->env_;
     timer_epolls->revents_[timer_epolls->RaiseNum_].data.fd = timer_event->selffd_;
     timer_epolls->RaiseNum_++;
-    LOG_DEBUG("Epoll come");
+    // LOG_DEBUG("Epoll come");
     if (!timer_epolls->isOutTime_)
     {
         timer_epolls->isOutTime_ = 1;

@@ -2,6 +2,7 @@
 #include "routine.cpp"
 
 using namespace Tattoo;
+
 EventLoop::EventLoop(MiniHeap *time_heap, EventLoopFun fun, void *arg)
     : time_heap_(time_heap),
       runInLoopFunction_(fun),
@@ -11,7 +12,7 @@ EventLoop::EventLoop(MiniHeap *time_heap, EventLoopFun fun, void *arg)
 EventLoop::~EventLoop()
 {
 }
-void EventLoop::runINLoop()
+void EventLoop::runInLoop()
 {
     if (runInLoopFunction_)
         runInLoopFunction_(arg_);

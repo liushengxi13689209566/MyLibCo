@@ -39,12 +39,12 @@ public:
   void *arg_;         //函数参数
   Coctx_t ctx_;       //保存上下文
 
-  bool IsRun_;         //协程是否运行 cstart
-  bool IsDead_;        //协程是否结束 cend
-  bool IsMainRoutine_; //是否是主协程 cIsMain
+  char start_;         //协程是否运行 cstart
+  char end_;           //协程是否结束 cend
+  char IsMainRoutine_; //是否是主协程 cIsMain
   /********************************************占坑，hook层***********************************************************/
-  char EnableSysHook;
-  char IsShareStack;
+  char EnableSysHook_;
+  char IsShareStack_;
 
   StackMemory_t *stack_mem_;
 

@@ -39,7 +39,7 @@ class Timer
 class MiniHeap
 {
   public:
-	using TimerPtr = std::shared_ptr<class Timer>;
+	using TimerPtr = class Timer *;
 
 	MiniHeap() {}
 	~MiniHeap(){};
@@ -53,7 +53,8 @@ class MiniHeap
 	}
 	void AddTimer(TimerFun timefun, void *arg, int delay)
 	{
-		que.push(std::make_shared<Timer>(timefun, arg, delay));
+		Timer tmp(timefun, arg, delay);
+		que.push(&tmp);
 	}
 	/*删除定时器（肯定是优先队列的第一个元素）想想为什么？？*/
 	void DelTimer(Timer *timer)

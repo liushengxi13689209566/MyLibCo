@@ -16,10 +16,9 @@
 #include "routine.h"
 #include "routine.cpp"
 #include "Time_heap.h"
-#include "Time_heap.cpp"
 #include "Poller.h"
 #include "Poller.cpp"
-#include "Log.h"
+// #include "Log.h"
 #include "Epoll.h"
 #include "Epoll.cpp"
 #include "callback.h"
@@ -82,13 +81,6 @@ static int CreateTcpSocket(const unsigned short shPort = 0, const char *pszIP = 
     }
     return fd;
 }
-
-void *timerCallback(Routine_t *routine)
-{
-    //std::cout<<"I'm timerCallback Function. I will Resume this routine!\n"<<std::endl;
-    routine->Resume();
-}
-
 void *Poll(void *arg)
 {
     int backlog;

@@ -39,7 +39,7 @@ class TimerEvent : public Timer
 class TimerEpolls : public Timer
 {
   public:
-	TimerEpolls();
+	TimerEpolls() {}
 	TimerEpolls(
 		TimerFun timerCallback, void *arg,
 		int delay, unsigned long long evsNum, int epfd,
