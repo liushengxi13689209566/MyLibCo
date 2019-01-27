@@ -13,11 +13,11 @@ namespace Tattoo
 {
 class Poller
 {
-  public:
+public:
 	Poller(TimerFun timefun, void *arg, int delay);
 	~Poller();
 
-  private:
+private:
 	MiniHeap *miniheap_;
 	TimerFun timerCallback_;
 	void *arg_;

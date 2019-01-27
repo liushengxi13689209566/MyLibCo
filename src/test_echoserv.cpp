@@ -102,6 +102,7 @@ static void *readwrite_routine(void *arg)
         {
             g_readwrite.push(tsk);
             get_curr_routine()->Yield();
+            continue;
         }
 
         //设置为-1表示已读，方便协程下次循环退出
@@ -116,7 +117,7 @@ static void *readwrite_routine(void *arg)
             struct epoll_event env;
             env.data.fd = fd;
             env.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
-            int epollret = get_curr_thread_env()->epoll_->addEpoll(&env, 1, revents, 10);
+            int epollret = get_curr_thread_env()->epoll_->addEpoll(&env, 1, revents, 1000);
             if (epollret == 0)
             {
                 continue;
@@ -127,13 +128,14 @@ static void *readwrite_routine(void *arg)
             {
                 std::cout << __FUNCTION__ << __LINE__ << "ret : " << ret << std::endl;
                 std::cout << __FUNCTION__ << __LINE__ << "message :: " << buf << std::endl;
-                //ret = write( fd,buf,ret );
+                ret = write(fd, buf, ret);
             }
-            else
+            if (ret > 0 || (-1 == ret && EAGAIN == errno))
             {
-                close(fd);
-                break;
+                continue;
             }
+            close(fd);
+            break;
         }
     }
 }
@@ -147,19 +149,16 @@ static void *accept_routine(void *)
         memset(&addr, 0, sizeof(addr));
         socklen_t len = sizeof(addr);
         int fd = accept(g_listen_fd, (struct sockaddr *)&addr, &len);
-
         if (fd < 0)
         {
+            //如果接收连接失败，那么调用 co_poll 将服务端的 listen_fd 加入到 Epoll 中来触发下一次连接事件
             struct epoll_event ev;
             ev.data.fd = g_listen_fd;
             ev.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
             struct epoll_event revents[10];
-            std::cout << __FUNCTION__ << " : " << __LINE__ << " a New Connection !" << std::endl;
-
+            // std::cout << __FUNCTION__ << " : " << __LINE__ << " a New Connection !" << std::endl;
             int epollret = get_curr_thread_env()->epoll_->addEpoll(&ev, 1, revents, 10);
-
             std::cout << __FUNCTION__ << " : " << __LINE__ << " add epoll success " << std::endl;
-
             continue;
         }
         if (g_readwrite.empty())
@@ -182,11 +181,11 @@ static void *accept_routine(void *)
 
 //典型的Reactor模式
 
-int main()
+int main(int argc, char *argv[])
 {
     int backlog;
-    int portnumber = 12349;
-    char *local_addr = "127.0.0.1";
+    char *local_addr = argv[1];
+    int portnumber = atoi(argv[2]);
 
     g_listen_fd = CreateTcpSocket(portnumber, local_addr, true);
     listen(g_listen_fd, 1024);

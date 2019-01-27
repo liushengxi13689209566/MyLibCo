@@ -161,7 +161,7 @@ static int RoutineFunc(Routine_t *rou, void *)
 }
 Routine_t *get_curr_routine()
 {
-    std::cout << "get_curr_routine" << std::endl;
+    // std::cout << "get_curr_routine" << std::endl;
     RoutineEnv_t *env = get_curr_thread_env();
     return env->CallStack_[env->CallStackSize_ - 1];
 }

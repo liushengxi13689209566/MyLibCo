@@ -83,7 +83,7 @@ int Epoll::addEpoll(struct epoll_event *evs, unsigned long long evNum,
         int ret = epoll_ctl(epollfd_, EPOLL_CTL_ADD, arg->timer_event_[i].selffd_, &arg->timer_event_[i].env_);
         assert(ret == 0);
     }
-    //将Timer_Epolls 定时事件加入定时器
+    //将 Timer_Epolls 定时事件加入定时器
     get_curr_thread_env()->time_heap_->AddTimer(arg);
     //退出当前协程
     get_curr_routine()->Yield();
