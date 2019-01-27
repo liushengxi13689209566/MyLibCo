@@ -52,37 +52,29 @@ class TimerEpolls : public Timer
 	bool isOutTime_;
 	TimerEvent *timer_event_;
 };
-class EpollRes
-{
-  public:
-	EpollRes(int size) : size_(size)
-	{
-		events_ = (struct epoll_event *)calloc(1, size_ * sizeof(struct epoll_event));
-	}
-	~EpollRes()
-	{
-		delete events_;
-	}
-	int size_;
-	struct epoll_event *events_;
-};
+
 class Epoll
 {
   public:
-	Epoll()
+	Epoll(EventLoop *loop)
 	{
 		epollfd_ = ::epoll_create(kInitEventListSize);
 		result_ = new EpollRes(kInitEventListSize);
 	}
 	~Epoll() {}
-	int addEpoll(struct epoll_event *evs, unsigned long long evNum,
-				 struct epoll_event *revents, int timeout,
-				 unsigned long long maxNum = 1024 * 10);
+
+	int poll(int timeoutMs, ChannelList *activeChannels);
+
+  private:
+	typedef std::vector<struct epoll_event> EpollEventList;
+	typedef std::map<int, Channel *> ChannelMap; //key是文件描述符，value是Channel *
 
 	static const int kInitEventListSize = 1024 * 10;
-	struct epoll_event *eventList;
 	int epollfd_;
-	class EpollRes *result_;
+
+	EventLoop *ownreLoop_;
+	EpollEventList events_;
+	ChannelMap channels_;
 };
 } // namespace Tattoo
 #endif
