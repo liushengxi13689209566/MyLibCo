@@ -27,12 +27,9 @@
 #include "callback.h"
 using namespace Tattoo;
 
-struct task
-{
-    Routine_t *routine;
-    int fd;
-};
-static std::stack<task *> g_readwrite;
+// Channel Channel; //与 Routine_t 对应
+
+static std::stack<Channel *> g_readwrite;
 static int g_listen_fd = -1;
 
 //设置非阻塞Socket
@@ -93,35 +90,29 @@ static int CreateTcpSocket(const unsigned short shPort = 0, const char *pszIP = 
 
 static void *readwrite_routine(void *arg)
 {
-    task *tsk = (task *)arg;
+    Channel *chan = (Channel *)arg;
     char buf[1024 * 10];
     for (;;)
     {
-        //当本协程没有监听Socket是，把其放入协程等待队列
-        if (tsk->fd == -1)
+        //channel与Routine_t还没有绑定，把其放入协程等待队列
+        if (chan->rou_ == NULL)
         {
-            g_readwrite.push(tsk);
-            get_curr_routine()->Yield();
+            g_readwrite.push(chan);
+            get_curr_routine()->Yield(); //co_yield_ct() ;
             continue;
         }
 
         //设置为-1表示已读，方便协程下次循环退出
-        int fd = tsk->fd;
-        tsk->fd = -1;
+        int fd = chan->fd();
+        chan->rou_ = NULL;
 
-        struct epoll_event revents[1000];
-        //不断监听
-        //不断循环等待，等待读取信息
         for (;;)
         {
-            struct epoll_event env;
-            env.data.fd = fd;
-            env.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
-            int epollret = get_curr_thread_env()->epoll_->addEpoll(&env, 1, revents, 1000);
-            if (epollret == 0)
-            {
-                continue;
-            }
+
+            Channel Channel(get_curr_eventloop(), fd); //将新建立的连接的 fd 加入到 Epoll 监听中,并设置可读可写
+            // Channel.update();
+            /* 将新建立的连接的 fd 加入到 Epoll 监听中，并将控制流程返回到 main 协程；
+            当有读或者写事件发生时，Epoll 会唤醒对应的 coroutine ，继续执行 read 函数以及 write 函数。*/
 
             int ret = read(fd, buf, sizeof(buf));
             if (ret > 0)
@@ -142,9 +133,9 @@ static void *readwrite_routine(void *arg)
 
 static void *accept_routine(void *)
 {
+    std::cout << "accepter ::" << std::endl;
     for (;;)
     {
-        std::cout << "accepter ::" << std::endl;
         struct sockaddr_in addr; //maybe sockaddr_un;
         memset(&addr, 0, sizeof(addr));
         socklen_t len = sizeof(addr);
@@ -157,7 +148,6 @@ static void *accept_routine(void *)
             ev.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
             struct epoll_event revents[10];
             // std::cout << __FUNCTION__ << " : " << __LINE__ << " a New Connection !" << std::endl;
-            int epollret = get_curr_thread_env()->epoll_->addEpoll(&ev, 1, revents, 10);
             std::cout << __FUNCTION__ << " : " << __LINE__ << " add epoll success " << std::endl;
             continue;
         }
@@ -172,9 +162,9 @@ static void *accept_routine(void *)
         //accept完后启动其他协程
 
         //取出最顶端的空闲协程执行对应的fd读写
-        task *tsk = g_readwrite.top();
-        tsk->fd = fd;
-        tsk->routine->Resume();
+        Channel *chan = g_readwrite.top();
+        chan->fd = fd;
+        chan->routine->Resume();
         g_readwrite.pop();
     }
 }
@@ -183,6 +173,8 @@ static void *accept_routine(void *)
 
 int main(int argc, char *argv[])
 {
+    EventLoop eventloop;
+
     int backlog;
     char *local_addr = argv[1];
     int portnumber = atoi(argv[2]);
@@ -192,16 +184,13 @@ int main(int argc, char *argv[])
 
     SetNonBlock(g_listen_fd);
 
-    //在每个进程中创建协程
     std::vector<Routine_t *> Routine_tArr;
     int number = 10;
-
     for (int i = 0; i < number; i++)
     {
-        task *tsk = (task *)calloc(1, sizeof(task));
-        tsk->fd = -1;
-        Routine_tArr.push_back(new Routine_t(get_curr_thread_env(), NULL, readwrite_routine, tsk));
-        tsk->routine = Routine_tArr[i];
+        Channel *chan = new Channel(readwrite_routine, );
+        Routine_tArr.push_back(new Routine_t(get_curr_thread_env(), NULL, readwrite_routine, chan));
+        chan->routine = Routine_tArr[i];
     }
 
     for (int i = 0; i < number; i++)
@@ -212,7 +201,6 @@ int main(int argc, char *argv[])
     Routine_t *accepter = (new Routine_t(get_curr_thread_env(), NULL, accept_routine, NULL));
     accepter->Resume();
 
-    EventLoop eventloop(get_curr_thread_env()->time_heap_, NULL, NULL);
     eventloop.loop();
     return 0;
 }
