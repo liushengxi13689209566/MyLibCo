@@ -25,9 +25,8 @@
 #include "Epoll.h"
 #include "Epoll.cpp"
 #include "callback.h"
+#include "Channel.h"
 using namespace Tattoo;
-
-// Channel Channel; //与 Routine_t 对应
 
 static std::stack<Channel *> g_readwrite;
 static int g_listen_fd = -1;
@@ -95,7 +94,7 @@ static void *readwrite_routine(void *arg)
     for (;;)
     {
         //channel与Routine_t还没有绑定，把其放入协程等待队列
-        if (chan->rou_ == NULL)
+        if (chan->fd_ == -1)
         {
             g_readwrite.push(chan);
             get_curr_routine()->Yield(); //co_yield_ct() ;
@@ -104,13 +103,13 @@ static void *readwrite_routine(void *arg)
 
         //设置为-1表示已读，方便协程下次循环退出
         int fd = chan->fd();
-        chan->rou_ = NULL;
+        chan->fd_ = -1;
 
         for (;;)
         {
 
             Channel Channel(get_curr_eventloop(), fd); //将新建立的连接的 fd 加入到 Epoll 监听中,并设置可读可写
-            // Channel.update();
+
             /* 将新建立的连接的 fd 加入到 Epoll 监听中，并将控制流程返回到 main 协程；
             当有读或者写事件发生时，Epoll 会唤醒对应的 coroutine ，继续执行 read 函数以及 write 函数。*/
 
@@ -188,11 +187,10 @@ int main(int argc, char *argv[])
     int number = 10;
     for (int i = 0; i < number; i++)
     {
-        Channel *chan = new Channel(readwrite_routine, );
+        Channel *chan = new Channel(readwrite_routine);
         Routine_tArr.push_back(new Routine_t(get_curr_thread_env(), NULL, readwrite_routine, chan));
         chan->routine = Routine_tArr[i];
     }
-
     for (int i = 0; i < number; i++)
     {
         Routine_tArr[i]->Resume();
@@ -200,7 +198,7 @@ int main(int argc, char *argv[])
 
     Routine_t *accepter = (new Routine_t(get_curr_thread_env(), NULL, accept_routine, NULL));
     accepter->Resume();
-
     eventloop.loop();
+    
     return 0;
 }

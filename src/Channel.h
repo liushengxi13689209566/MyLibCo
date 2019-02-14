@@ -7,20 +7,23 @@
 
 #ifndef _CHANNEL_H
 #define _CHANNEL_H
-#include "noncopyable.h"
+// #include "noncopyable.h"
 #include <functional>
 #include <ctime>
 namespace Tattoo
 {
-class EventLoop;
+	
+using namespace std;
 
-class Channel : noncopyable
+class EventLoop;
+class Channel 
 {
 	typedef std::function<void()> EventCallback;		   // 事件回调函数
 	typedef std::function<void(time_t)> ReadEventCallback; // 读操作回调函数，需要传入时间
 
   public:
 	Channel(EventLoop *loop, int fd, Routine_t rou);
+
 	~Channel();
 
 	// 处理回调事件，一般由epoll通过eventLoop来调用
