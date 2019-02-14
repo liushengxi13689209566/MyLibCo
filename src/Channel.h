@@ -10,12 +10,14 @@
 // #include "noncopyable.h"
 #include <functional>
 #include <ctime>
+#include"routine.h"
+
 namespace Tattoo
 {
 	
 using namespace std;
-
 class EventLoop;
+
 class Channel 
 {
 	typedef std::function<void()> EventCallback;		   // 事件回调函数
@@ -60,7 +62,7 @@ class Channel
 	}
 
   private:
-	/* 通过调用loop_->updateChannel()来注册或改变本fd在epoll中监听的事件,一律改为可读可写*/
+	/* 通过调用loop_->updateChannel()来注册或改变本fd在 epoll 中监听的事件,一律改为可读可写*/
 	void update();
 
 	static const int kNoneEvent;  //无事件
