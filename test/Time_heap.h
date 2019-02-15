@@ -47,7 +47,7 @@ class Timer
 	}
 
   private:
-	Timestamp expire_;					//任务的超时事件
+	Timestamp expire_;			   //任务的超时事件
 	const TimerCallback callback_; // 回调函数
 	const double interval_;
 	const bool repeat_;
@@ -55,10 +55,11 @@ class Timer
 
 class TimeHeap
 {
+  public:
 	TimeHeap(EventLoop *loop);
 	~TimeHeap();
 
-	void addTimer(const TimerCallback &cb,Timestamp when, double interval);
+	void addTimer(const TimerCallback &cb, Timestamp when, double interval);
 	//FIXME:
 	// void cancel(TimerId timerId);
 

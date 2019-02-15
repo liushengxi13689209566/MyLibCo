@@ -94,7 +94,7 @@ TimeHeap::~TimeHeap()
 	}
 }
 /* 添加一个定时器 */
-void TimeHeap::addTimer(const TimerCallback &cb,Timestamp when, int interval)
+void TimeHeap::addTimer(const TimerCallback &cb,Timestamp when, double interval)
 {
 	Timer *timer = new Timer(cb,when, interval);
 	loop_->runInLoop(
