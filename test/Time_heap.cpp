@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <functional>
 #include <assert.h>
+#include <cstring>
 
 namespace Tattoo
 {
@@ -62,7 +63,7 @@ void resetTimerfd(int timerfd, Timestamp expiration)
 	int ret = ::timerfd_settime(timerfd, 0, &newValue, &oldValue);
 	if (ret)
 	{
-		LOG_SYSERR << "timerfd_settime()";
+		std::cout << "timerfd_settime()" << std::endl;
 	}
 }
 } // namespace detail
@@ -93,9 +94,9 @@ TimeHeap::~TimeHeap()
 	}
 }
 /* 添加一个定时器 */
-void TimeHeap::addTimer(const TimerFun &cb, void *arg, Timestamp when, int interval)
+void TimeHeap::addTimer(const TimerCallback &cb,Timestamp when, int interval)
 {
-	Timer *timer = new Timer(cb, arg, when, interval);
+	Timer *timer = new Timer(cb,when, interval);
 	loop_->runInLoop(
 		std::bind(&TimeHeap::addTimerInLoop, this, timer));
 	return;

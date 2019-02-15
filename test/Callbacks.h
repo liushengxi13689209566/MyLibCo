@@ -15,7 +15,7 @@ using namespace  std;
 
 // All client visible callbacks go here.
 
-typedef void *(*TimerFun)(void *);
+typedef std::function<void()> TimerCallback;
 
 
 } // namespace Tattoo

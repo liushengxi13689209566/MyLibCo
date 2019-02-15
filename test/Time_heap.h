@@ -19,9 +19,8 @@ namespace Tattoo
 class Timer
 {
   public:
-	Timer(const TimerFun &cb, void *arg, Timestamp when, int interval)
-		: timerCallback_(cb),
-		  arg_(arg),
+	Timer(const TimerCallback &cb, Timestamp when, int interval)
+		: callback_(cb),
 		  expire_(when),
 		  interval_(interval),
 		  repeat_(interval > 0.0)
@@ -44,13 +43,12 @@ class Timer
 
 	void run() const
 	{
-		timerCallback_(arg_);
+		callback_();
 	}
 
   private:
-	Timestamp expire_;			   //任务的超时事件
-	const TimerFun timerCallback_; // 回调函数
-	void *arg_;
+	Timestamp expire_;					//任务的超时事件
+	const TimerCallback callback_; // 回调函数
 	const double interval_;
 	const bool repeat_;
 };
@@ -60,7 +58,7 @@ class TimeHeap
 	TimeHeap(EventLoop *loop);
 	~TimeHeap();
 
-	void addTimer(const TimerFun &cb, void *arg, Timestamp when, int interval);
+	void addTimer(const TimerCallback &cb,Timestamp when, double interval);
 	//FIXME:
 	// void cancel(TimerId timerId);
 
