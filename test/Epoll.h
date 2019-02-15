@@ -23,7 +23,7 @@ class Epoll
 
 	Epoll(EventLoop *loop);
 	~Epoll();
-	
+
 	Timestamp poll(int timeoutMs, ChannelList *activeChannels);
 
 	void updateChannel(Channel *channel);
@@ -32,14 +32,17 @@ class Epoll
 	void fillActiveChannels(int numEvents,
 							ChannelList *activeChannels) const;
 
+	void update(int operation, Channel *channel);
+	static const char *operationToString(int op);
+	
 	typedef std::vector<struct epoll_event> EpollEventList;
 	typedef std::map<int, Channel *> ChannelMap; //key是文件描述符，value是Channel *
 
-	static const int kInitEventListSize = 1024 * 10;
+	static const int kInitEventListSize = 1024;
 	int epollfd_;
 
 	EventLoop *owerLoop_;
-	EpollEventList eventfds_;
+	EpollEventList events_;
 	ChannelMap channels_;
 };
 } // namespace Tattoo

@@ -83,7 +83,7 @@ class Channel
 	EventLoop *loop_;
 	const int fd_;
 	int events_;  // 该fd正在监听的事件
-	int revents_; // poll调用后，该fd需要处理的事件，依据它，poller调用它相应的回调函数
+	int revents_; // poll调用后，该 fd 需要处理的事件，依据它，poller调用它相应的回调函数
 	int index_;   //  used by Poller
 
 	// bool addToLoop_;

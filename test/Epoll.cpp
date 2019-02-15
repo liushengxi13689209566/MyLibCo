@@ -1,38 +1,50 @@
 
 #include "Epoll.h"
 // #include "Log.h"
-#include "routine.h"
+// #include "routine.h"
+
 #include <sys/epoll.h>
+#include <iostream>
 #include <assert.h>
+#include <unistd.h>
+#include <errno.h>
+#include <cstring>
+#include "Channel.h"
+
 using namespace Tattoo;
+
+namespace
+{
+const int kNew = -1;
+const int kAdded = 1;
+const int kDeleted = 2;
+} // namespace
+
 Epoll::Epoll(EventLoop *loop)
-    : epollfd_(epoll_create(kInitEventListSize)),
-      owerLoop_(loop)
+    : owerLoop_(loop),
+      epollfd_(::epoll_create1(EPOLL_CLOEXEC)),
+      events_(kInitEventListSize)
 {
 }
 Epoll::~Epoll()
 {
+    ::close(epollfd_);
 }
 
 Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
 {
     //调用epoll_wait
-    //events是一个EPollPoller中struct epoll_event的vector私有变量
+    //events是一个Epoll中 struct epoll_event的vector私有变量
     int numEvents = ::epoll_wait(epollfd_,
-                                 &*eventfds_.begin(), //可以使用eventfds_.data()返回指向第一个成员的指针
-                                 static_cast<int>(eventfds_.size()),
+                                 &*events_.begin(), //可以使用events_.data() 返回指向第一个成员的指针
+                                 static_cast<int>(events_.size()),
                                  timeoutMs);
     int savedErrno = errno;
-    time_t time(NULL);
+    Timestamp now(Timestamp::now());
     if (numEvents > 0)
     {
         //更新Channel列表
-        fillActiveChannels(numEvents, activeChannels);
-
-        if (implicit_cast<size_t>(numEvents) == eventfds_.size())
-        {
-            eventfds_.resize(eventfds_.size() * 2); //如果返回的事件数目等于当前事件数组大小，就分配2倍空间
-        }
+        fillActiveChannels(numEvents, activeChannels); //填充 activeChannels
     }
     else if (numEvents == 0)
     {
@@ -44,7 +56,7 @@ Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
         // if (savedErrno != EINTR)
         // {
         //     errno = savedErrno;
-        //     LOG_SYSERR << "EPollPoller::poll()";
+        //     LOG_SYSERR << "Epoll::poll()";
         // }
     }
 }
@@ -52,17 +64,78 @@ Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
 void Epoll::fillActiveChannels(int numEvents,
                                ChannelList *activeChannels) const
 {
-    assert(implicit_cast<size_t>(numEvents) <= eventfds_.size());
     for (int i = 0; i < numEvents; ++i)
     {
-        //epoll_wait会原封不动返回 ptr 指向的结构体
-        Channel *channel = static_cast<Channel *>(eventfds_[i].data.ptr);
+        //epoll_wait 会原封不动返回 ptr 指向的结构体
+        Channel *channel = static_cast<Channel *>(events_[i].data.ptr);
 
-        int fd = channel->fd();                             //拿到其中的文件描述符
-        ChannelMap::const_iterator it = channels_.find(fd); //ChannelMap以文件描述符为key
-        assert(it != channels_.end());
-        assert(it->second == channel);
-        channel->set_revents(eventfds_[i].events); //将事件类型赋值给Channel类中reventfds_元素
-        activeChannels->push_back(channel);        //添加进就绪事件合集
+        channel->set_revents(events_[i].events); //将事件类型赋值给Channel类中 revents_ 元素
+        activeChannels->push_back(channel);      //添加进就绪事件合集
+    }
+}
+//　更新　
+void Epoll::updateChannel(Channel *channel)
+{
+    const int index = channel->index();
+    if (index == kNew || index == kDeleted)
+    {
+        // a new one, add with EPOLL_CTL_ADD
+        int fd = channel->fd();
+        if (index == kNew)
+        {
+            assert(channels_.find(fd) == channels_.end());
+            channels_[fd] = channel;
+        }
+        else // index == kDeleted
+        {
+            assert(channels_.find(fd) != channels_.end());
+            assert(channels_[fd] == channel);
+        }
+
+        channel->set_index(kAdded);
+        update(EPOLL_CTL_ADD, channel);
+    }
+    else
+    {
+        // update existing one with EPOLL_CTL_MOD/DEL
+        int fd = channel->fd();
+        (void)fd;
+        assert(channels_.find(fd) != channels_.end());
+        assert(channels_[fd] == channel);
+        assert(index == kAdded);
+        if (channel->isNoneEvent())
+        {
+            update(EPOLL_CTL_DEL, channel);
+            channel->set_index(kDeleted);
+        }
+        else
+        {
+            update(EPOLL_CTL_MOD, channel);
+        }
+    }
+}
+
+void Epoll::update(int operation, Channel *channel)
+{
+    struct epoll_event event;
+    bzero(&event, sizeof(event));
+    event.events = channel->events();
+    event.data.ptr = channel;
+    int fd = channel->fd();
+    ::epoll_ctl(epollfd_, operation, fd, &event);
+}
+const char *Epoll::operationToString(int op)
+{
+    switch (op)
+    {
+    case EPOLL_CTL_ADD:
+        return "ADD";
+    case EPOLL_CTL_DEL:
+        return "DEL";
+    case EPOLL_CTL_MOD:
+        return "MOD";
+    default:
+        assert(false && "ERROR op");
+        return "Unknown Operation";
     }
 }
