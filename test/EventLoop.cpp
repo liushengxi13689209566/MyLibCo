@@ -32,7 +32,7 @@ void EventLoop::loop()
 	while (1)
 	{
 		activeChannels_.clear();
-		pollReturnTime = epoll_->poll(kPollTimeMs, &activeChannels_);
+		epoll_->poll(kPollTimeMs, &activeChannels_);
 
 		for (auto it = activeChannels_.begin();
 			 it != activeChannels_.end(); ++it)
