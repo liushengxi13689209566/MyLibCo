@@ -16,7 +16,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-using namespace muduo;
+using namespace Tattoo;
 
 namespace
 {
