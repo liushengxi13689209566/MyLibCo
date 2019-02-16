@@ -50,6 +50,7 @@ void setNonBlockAndCloseOnExec(int sockfd)
 
 } // namespace
 
+//创建非阻塞 socket
 int sockets::createNonblockingOrDie()
 {
   int sockfd = ::socket(AF_INET,

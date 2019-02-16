@@ -12,7 +12,6 @@
 #include <strings.h> // bzero
 #include <netinet/in.h>
 
-
 //     /* Structure describing an Internet socket address.  */
 //     struct sockaddr_in {
 //         sa_family_t    sin_family; /* address family: AF_INET */
@@ -28,8 +27,7 @@
 
 using namespace Tattoo;
 
-static const in_addr_t kInaddrAny = INADDR_ANY;
-
+static const in_addr_t kInaddrAny = INADDR_ANY; //任何地址　
 
 InetAddress::InetAddress(uint16_t port)
 {

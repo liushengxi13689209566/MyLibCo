@@ -18,5 +18,9 @@ using namespace  std;
 typedef std::function<void()> TimerCallback;
 
 
+//协程函数
+typedef void *(*RoutineFun)(void *);
+
+
 } // namespace Tattoo
 #endif
