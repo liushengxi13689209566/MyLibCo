@@ -61,8 +61,8 @@ void init_curr_thread_env()
     Coctx_init(&self->ctx_);
     env->CallStack_[env->CallStackSize_++] = self;
 
-    env->time_heap_ = new MiniHeap();
-    env->epoll_ = new Epoll();
+    // env->time_heap_ = new MiniHeap();
+    // env->epoll_ = new Epoll();
 }
 RoutineEnv_t *get_curr_thread_env()
 {

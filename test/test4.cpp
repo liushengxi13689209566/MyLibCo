@@ -14,16 +14,16 @@
 
 #if (0)
 int cnt = 0;
-Tattoo::EventLoop *g_loop;
+EventLoop *g_loop;
 
 void printTid()
 {
-	printf("now %s\n", Tattoo::Timestamp::now().toString().c_str());
+	printf("now %s\n", Timestamp::now().toString().c_str());
 }
 
 void print(const char *msg)
 {
-	printf("msg %s %s\n", Tattoo::Timestamp::now().toString().c_str(), msg);
+	printf("msg %s %s\n", Timestamp::now().toString().c_str(), msg);
 	if (++cnt == 20)
 	{
 		exit(0);
@@ -33,7 +33,7 @@ void print(const char *msg)
 int main()
 {
 	printTid();
-	Tattoo::EventLoop loop;
+	EventLoop loop;
 	g_loop = &loop;
 
 	print("main");
@@ -52,27 +52,31 @@ int main()
 #include "EventLoop.h"
 #include "InetAddress.h"
 #include "SocketsOps.h"
-#include <stdio.h>
-#include <unistd.h>
+
+#include "Acceptor.cpp"
+#include "EventLoop.cpp"
+#include "InetAddress.cpp"
+#include "SocketsOps.cpp"
+#include "Socket.cpp"
 
 using namespace Tattoo;
 
-void newConnection(int sockfd, const Tattoo::InetAddress &peerAddr)
+void newConnection(int sockfd, const InetAddress &peerAddr)
 {
 	printf("newConnection(): accepted a new connection from %s\n",
 		   peerAddr.toHostPort().c_str());
 	::write(sockfd, "How are you?\n", 13);
-	Tattoo::sockets::close(sockfd);
+	sockets::close(sockfd);
 }
 
 int main()
 {
 	printf("main(): pid = %d\n", getpid());
 
-	Tattoo::InetAddress listenAddr(9981);
-	Tattoo::EventLoop loop;
+	InetAddress listenAddr(9981);
+	EventLoop loop;
 
-	Tattoo::Acceptor acceptor(&loop, listenAddr);
+	Acceptor acceptor(&loop, listenAddr);
 	acceptor.setNewConnectionCallback(newConnection);
 	acceptor.listen();
 

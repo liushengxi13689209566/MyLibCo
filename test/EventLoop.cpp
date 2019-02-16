@@ -8,7 +8,7 @@
 #include <iostream>
 #include "Channel.h"
 #include "Epoll.h"
-#include "Time_heap.h"
+#include "MiniHeap.h"
 #include "EventLoop.h"
 
 using namespace Tattoo;
@@ -40,7 +40,7 @@ void EventLoop::loop()
 			(*it)->handleEvent(); //事件分发
 		}
 	}
-	
+
 	std::cout << "EventLoop " << this << " stop looping" << std::endl;
 	looping_ = false;
 }
@@ -64,7 +64,7 @@ void EventLoop::runInLoop(const Functor &cb)
 {
 	cb();
 }
-void EventLoop::updateChannel(Channel* channel)
+void EventLoop::updateChannel(Channel *channel)
 {
-  epoll_->updateChannel(channel);
+	epoll_->updateChannel(channel);
 }
