@@ -12,16 +12,16 @@
 
 #include <netinet/in.h>
 #include <netinet/tcp.h>
-#include <strings.h>  // bzero
+#include <strings.h> // bzero
 
-using namespace muduo;
+using namespace Tattoo;
 
 Socket::~Socket()
 {
   sockets::close(sockfd_);
 }
 
-void Socket::bindAddress(const InetAddress& addr)
+void Socket::bindAddress(const InetAddress &addr)
 {
   sockets::bindOrDie(sockfd_, addr.getSockAddrInet());
 }
@@ -31,7 +31,7 @@ void Socket::listen()
   sockets::listenOrDie(sockfd_);
 }
 
-int Socket::accept(InetAddress* peeraddr)
+int Socket::accept(InetAddress *peeraddr)
 {
   struct sockaddr_in addr;
   bzero(&addr, sizeof addr);
@@ -50,6 +50,3 @@ void Socket::setReuseAddr(bool on)
                &optval, sizeof optval);
   // FIXME CHECK
 }
-
-
-
