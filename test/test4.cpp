@@ -63,14 +63,16 @@ int main()
 #include "MiniHeap.cpp"
 #include "Epoll.cpp"
 
-
-
 using namespace Tattoo;
 
 void newConnection(int sockfd, const InetAddress &peerAddr)
 {
 	printf("newConnection(): accepted a new connection from %s\n",
 		   peerAddr.toHostPort().c_str());
+
+	// char str[1024] = {0};
+	// ::read(sockfd,str,1024);
+
 	::write(sockfd, "How are you?\n", 13);
 	sockets::close(sockfd);
 }
