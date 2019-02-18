@@ -76,9 +76,9 @@ CFLAGS += -std=c++11 -g -fno-strict-aliasing -O0 -Wall -export-dynamic \
 LINKS += -std=c++11 -g -L./lib -lcolib -lpthread -ldl 
 
 #生成静态库和动态库时需要的文件
-COLIB_OBJS=routine.o  coctx_swap.o coctx.o
+COLIB_OBJS= routine.o  coctx_swap.o coctx.o 
 
-PROGS = colib test_hello   test4
+PROGS = colib test_hello  test4
 # test_echoserv
 # liu_EchoServer test_shareStack
 # example_poll  example_echocli example_thread  example_cond example_specific example_copystack example_closure 

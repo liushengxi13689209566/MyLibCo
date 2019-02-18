@@ -58,6 +58,12 @@ int main()
 #include "InetAddress.cpp"
 #include "SocketsOps.cpp"
 #include "Socket.cpp"
+#include "Channel.cpp"
+#include "Timestamp.cpp"
+#include "MiniHeap.cpp"
+#include "Epoll.cpp"
+
+
 
 using namespace Tattoo;
 

@@ -5,7 +5,7 @@
 	> Created Time: 2019年01月22日 星期二 16时49分00秒
  ************************************************************************/
 
-#include "Time_heap.h"
+#include "MiniHeap.h"
 
 #include <sys/timerfd.h>
 #include <iostream>
@@ -94,9 +94,9 @@ TimeHeap::~TimeHeap()
 	}
 }
 /* 添加一个定时器 */
-void TimeHeap::addTimer(const TimerCallback &cb,Timestamp when, double interval)
+void TimeHeap::addTimer(const TimerCallback &cb, Timestamp when, double interval)
 {
-	Timer *timer = new Timer(cb,when, interval);
+	Timer *timer = new Timer(cb, when, interval);
 	loop_->runInLoop(
 		std::bind(&TimeHeap::addTimerInLoop, this, timer));
 	return;
