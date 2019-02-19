@@ -6,12 +6,12 @@
  ************************************************************************/
 
 #include <iostream>
-#include "Acceptor.h"
+// #include "Acceptor.h"
 #include "EventLoop.h"
 #include "InetAddress.h"
 #include "SocketsOps.h"
 
-#include "Acceptor.cpp"
+// #include "Acceptor.cpp"
 #include "EventLoop.cpp"
 #include "InetAddress.cpp"
 #include "SocketsOps.cpp"
@@ -135,7 +135,6 @@ static void *readwrite_routine(void *arg)
 		}
 	}
 }
-
 static void *accept_routine(void *)
 {
 	for (;;)
@@ -153,7 +152,7 @@ static void *accept_routine(void *)
 			// ev.data.fd = g_listen_fd;
 			// ev.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
 			// struct epoll_event revents[10];
-			chan.addEpoll(); //注册事件，并退出 yield() 
+			chan.addEpoll(); //注册事件，并退出 yield()
 
 			// int epollret = get_curr_thread_env()->epoll_->addEpoll(&ev, 1, revents, 10);
 			continue;
@@ -203,8 +202,6 @@ int main()
 		tsk->routine = RoutineArr[i];
 
 		RoutineArr[i]->Resume();
-		// Routine_tArr.push_back(new Routine_t(get_curr_thread_env(), NULL, readwrite_routine, tsk));
-		// tsk->routine = Routine_tArr[i];
 	}
 
 	Routine_t *accepter = (new Routine_t(get_curr_thread_env(), NULL, accept_routine, NULL));
