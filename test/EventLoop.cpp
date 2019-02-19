@@ -11,18 +11,18 @@
 #include "MiniHeap.h"
 #include "EventLoop.h"
 
-
 using namespace Tattoo;
 
 const int kPollTimeMs = 10000;
 
 EventLoop::EventLoop()
 	: looping_(false),
-	  rouEnv_(get_curr_thread_env()), // routine_env 结构
+	  rouEnv_(get_curr_thread_env()), //  初始化　routine_env 结构
 	  epoll_(new Epoll(this)),
 	  timerHeap_(new TimeHeap(this))
 {
-	std::cout << "EventLoop created " << this << " in thread " << std::endl;
+	std::cout << "EventLoop created " << this << std::endl;
+	rouEnv＿->envEventLoop＿ = this; //目前的关键点
 }
 EventLoop::~EventLoop()
 {

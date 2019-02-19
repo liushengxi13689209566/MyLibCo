@@ -68,6 +68,7 @@ public:
 
   // class Epoll *epoll_;
   // class MiniHeap *time_heap_;
+  class EventLoop *envEventLoop_;
 
   Routine_t *pending_rou_;
   Routine_t *occupy_rou_;

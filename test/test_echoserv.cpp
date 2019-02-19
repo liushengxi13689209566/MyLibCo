@@ -33,7 +33,6 @@ struct task_t
 
 static std::stack<task_t *> g_readwrite;
 static int g_listen_fd = -1;
-EventLoop eventloop;
 
 //设置非阻塞Socket
 static int SetNonBlock(int iSock)
@@ -116,8 +115,8 @@ static void *readwrite_routine(void *arg)
 			// env.data.fd = fd;
 			// env.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
 			// int epollret = get_curr_thread_env()->epoll_->addEpoll(&env, 1, revents, 10);
-
-			Channel chan(loop, g_listen_fd);
+			
+			Channel chan(get_curr_thread_env()->envEventLoop_,g_listen_fd);
 			chan.update(); //注册事件，并退出
 
 			int ret = read(fd, buf, sizeof(buf));
@@ -148,7 +147,7 @@ static void *accept_routine(void *)
 		int fd = accept(g_listen_fd, (struct sockaddr *)&addr, &len);
 		if (fd < 0)
 		{
-			Channel chan(loop, g_listen_fd);
+			Channel chan(get_curr_thread_env()->envEventLoop_, g_listen_fd);
 			// struct epoll_event ev;
 			// ev.data.fd = g_listen_fd;
 			// ev.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
@@ -191,6 +190,7 @@ int main()
 	//在每个进程中创建协程
 	int number = 10;
 
+	EventLoop eventloop;
 	std::vector<Routine_t *> RoutineArr;
 
 	for (int i = 0; i < number; i++)
