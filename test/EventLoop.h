@@ -12,6 +12,7 @@
 #include "Timestamp.h"
 #include <vector>
 #include <functional>
+#include "routine.h"
 
 // #include "routine.cpp"
 
@@ -35,7 +36,6 @@ class EventLoop
 	~EventLoop();
 
 	void loop();
-
 
 	Timestamp pollReturnTime() const { return pollReturnTime_; }
 
@@ -74,7 +74,6 @@ class EventLoop
 	// void removeChannel(Channel* channel);
 
   private:
-
 	typedef std::vector<Channel *> ChannelList;
 
 	bool looping_; /* atomic */
@@ -85,6 +84,7 @@ class EventLoop
 
 	ChannelList activeChannels_;
 	Functor pendingFunctors_;
+	RoutineEnv_t *rouEnv_;
 };
 } // namespace Tattoo
 

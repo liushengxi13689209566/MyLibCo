@@ -11,12 +11,14 @@
 #include "MiniHeap.h"
 #include "EventLoop.h"
 
+
 using namespace Tattoo;
 
 const int kPollTimeMs = 10000;
 
 EventLoop::EventLoop()
 	: looping_(false),
+	  rouEnv_(get_curr_thread_env()), // routine_env 结构
 	  epoll_(new Epoll(this)),
 	  timerHeap_(new TimeHeap(this))
 {

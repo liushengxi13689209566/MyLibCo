@@ -192,7 +192,7 @@ int main()
 	//在每个进程中创建协程
 	int number = 10;
 
-	EventLoop eventloop(get_curr_thread_env());
+	EventLoop eventloop;
 	std::vector<Channel *> channelsss;
 
 	for (int i = 0; i < number; i++)
