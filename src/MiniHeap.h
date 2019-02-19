@@ -17,7 +17,6 @@
 namespace Tattoo
 {
 class EventLoop;
-class Channel;
 
 /*定时器类*/
 class Timer

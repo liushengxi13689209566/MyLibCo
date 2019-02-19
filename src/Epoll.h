@@ -10,31 +10,39 @@
 #include <vector>
 #include <ctime>
 #include <map>
-#include "callback.h"
+#include "Callbacks.h"
 #include <sys/epoll.h>
+#include "EventLoop.h"
+#include "Channel.h"
 
 namespace Tattoo
 {
 class Epoll
 {
-public:
-	Epoll(EventLoop *loop)
-	{
-		epollfd_ = ::epoll_create(kInitEventListSize);
-		result_ = new EpollRes(kInitEventListSize);
-	}
-	~Epoll() {}
+  public:
+	typedef std::vector<Channel *> ChannelList;
 
-	int poll(int timeoutMs, ChannelList *activeChannels);
+	Epoll(EventLoop *loop);
+	~Epoll();
 
-private:
+	Timestamp poll(int timeoutMs, ChannelList *activeChannels);
+
+	void updateChannel(Channel *channel);
+
+  private:
+	void fillActiveChannels(int numEvents,
+							ChannelList *activeChannels) const;
+
+	void update(int operation, Channel *channel);
+	static const char *operationToString(int op);
+
 	typedef std::vector<struct epoll_event> EpollEventList;
 	typedef std::map<int, Channel *> ChannelMap; //key是文件描述符，value是Channel *
 
-	static const int kInitEventListSize = 1024 * 10;
+	static const int kInitEventListSize = 1024;
 	int epollfd_;
 
-	EventLoop *ownreLoop_;
+	EventLoop *owerLoop_;
 	EpollEventList events_;
 	ChannelMap channels_;
 };

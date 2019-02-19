@@ -9,8 +9,8 @@
 #define _ROUTINE_H
 #include <iostream>
 #include "coctx.h"
-#include "callback.h"
-#include "Time_heap.h"
+#include "Callbacks.h"
+#include "MiniHeap.h"
 #include "Epoll.h"
 namespace Tattoo
 {
@@ -61,13 +61,14 @@ public:
   }
   ~RoutineEnv_t()
   {
-    free(epoll_);
+    // free(epoll_);
   }
   Routine_t *CallStack_[128]; //用于保存当前线程中的协程　　
   int CallStackSize_;         //相当于栈指针
 
-  class Epoll *epoll_;
-  class MiniHeap *time_heap_;
+  // class Epoll *epoll_;
+  // class MiniHeap *time_heap_;
+  class EventLoop *envEventLoop_;
 
   Routine_t *pending_rou_;
   Routine_t *occupy_rou_;

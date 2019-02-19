@@ -10,41 +10,50 @@
 // #include "noncopyable.h"
 #include <functional>
 #include <ctime>
+#include "EventLoop.h"
+
 #include"routine.h"
 
 namespace Tattoo
 {
-	
+
 using namespace std;
 class EventLoop;
+class Routine_t;
 
-class Channel 
+
+class Channel
 {
-	typedef std::function<void()> EventCallback;		   // 事件回调函数
-	typedef std::function<void(time_t)> ReadEventCallback; // 读操作回调函数，需要传入时间
-
   public:
-	Channel(EventLoop *loop, int fd, Routine_t rou);
+	typedef std::function<void()> EventCallback; // 事件回调函数
+	// typedef std::function<void(time_t)> ReadEventCallback; // 读操作回调函数，需要传入时间
+
+	Channel(EventLoop *loop, int fd);
 
 	~Channel();
 
 	// 处理回调事件，一般由epoll通过eventLoop来调用
-	void handleEvent(time_t receiveTime);
+	void handleEvent();
 
-	void setReadCallback(ReadEventCallback cb)
+	void setReadCallback(const EventCallback &cb)
 	{
-		readCallback_ = std::move(cb);
+		readCallback_ = cb;
 	}
-	void setWriteCallback(EventCallback cb)
+	void setWriteCallback(const EventCallback &cb)
 	{
-		writeCallback_ = std::move(cb);
+		writeCallback_ = cb;
+	}
+	void setErrorCallback(const EventCallback &cb)
+	{
+		errorCallback_ = cb;
 	}
 
-	int getFd() const { return fd_; }
-	int getEvents() const { return events_; }
+	int fd() const { return fd_; }
+	int events() const { return events_; }
 	void set_revents(int revt) { revents_ = revt; } // used by epoll
 	bool isNoneEvent() const { return events_ == kNoneEvent; }
 
+	void addEpoll();
 	void enableReading()
 	{
 		events_ |= kReadEvent;
@@ -60,6 +69,11 @@ class Channel
 		events_ = kNoneEvent;
 		update();
 	}
+	//	for Poller
+	int index() { return index_; }
+	void set_index(int idx) { index_ = idx; }
+
+	EventLoop *ownerLoop() { return loop_; }
 
   private:
 	/* 通过调用loop_->updateChannel()来注册或改变本fd在 epoll 中监听的事件,一律改为可读可写*/
@@ -72,14 +86,15 @@ class Channel
 	EventLoop *loop_;
 	const int fd_;
 	int events_;  // 该fd正在监听的事件
-	int revents_; // poll调用后，该fd需要处理的事件，依据它，poller调用它相应的回调函数
-	bool addToLoop_;
-	Routine_t *rou_; //与　Routine_t　对应
+	int revents_; // poll调用后，该 fd 需要处理的事件，依据它，poller调用它相应的回调函数
+	int index_;   //  used by Poller
 
-	ReadEventCallback readCallback_;
+	// bool addToLoop_;
+
+	EventCallback readCallback_;
 	EventCallback writeCallback_;
-	EventCallback closeCallback_;
 	EventCallback errorCallback_;
+	Routine_t *channelRoutine_;
 };
 } // namespace Tattoo
 #endif

@@ -1,6 +1,7 @@
 
 #include "Channel.h"
 #include <iostream>
+#include <poll.h>
 
 using namespace Tattoo;
 
@@ -13,57 +14,49 @@ Channel::Channel(EventLoop *loop, int fd)
       fd_(fd),
       events_(0),
       index_(-1),
-      eventHandling_(false),
-      addToLoop_(false)
+      channelRoutine_(get_curr_routine())
 {
 }
 Channel::~Channel()
 {
-    assert(!eventHandling_);
-    if (loop_->isInLoopThread())
-    {
-        assert(!loop_->hasChannel(this));
-    }
 }
 void Channel::update()
 {
-    addToLoop_ = true;
     loop_->updateChannel(this);
 }
-void Channel::remove()
+
+void Channel::handleEvent()
 {
-    assert(isNoneEvent());
-    addToLoop_ = false;
-    loop_->removeChannel(this);
+    // if (revents_ & POLLNVAL)
+    // {
+    //     std::cout << "Channel::handle_event() POLLNVAL" << std::endl;
+    // }
+
+    // if (revents_ & (POLLERR | POLLNVAL))
+    // {
+    //     if (errorCallback_)
+    //         errorCallback_();
+    // }
+    // if (revents_ & (POLLIN | POLLPRI | POLLRDHUP))
+    // {
+    //     if (readCallback_)
+    //         readCallback_();
+    // }
+    // if (revents_ & POLLOUT)
+    // {
+    //     if (writeCallback_)
+    //         writeCallback_();
+    // }
+    
+    // 当有事件当来时直接唤醒对应的协程即可　
+    if(channelRoutine_)
+        channelRoutine_->Resume();
 }
-void Channel::handleEvent(time_t receiveTime)
+void Channel::addEpoll()
 {
-    eventHandling_ = true;
-    if ((revents_ & POLLHUP) && !(revents_ & POLLIN))
-    {
-        if (closeCallback_)
-            closeCallback_();
-    }
-
-    if (revents_ & POLLNVAL)
-    {
-        std::cout << "fd = " << fd_ << " Channel::handle_event() POLLNVAL" << std::endl;
-    }
-
-    if (revents_ & (POLLERR | POLLNVAL))
-    {
-        if (errorCallback_)
-            errorCallback_();
-    }
-    if (revents_ & (POLLIN | POLLPRI | POLLRDHUP))
-    {
-        if (readCallback_)
-            readCallback_(receiveTime);
-    }
-    if (revents_ & POLLOUT)
-    {
-        if (writeCallback_)
-            writeCallback_();
-    }
-    eventHandling_ = false;
+    //Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
+    update();
+    //退出当前协程
+    get_curr_routine()->Yield();
+    // fixme 删除加入的　epoll 信息
 }
