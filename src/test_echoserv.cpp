@@ -36,8 +36,6 @@ struct task
 static std::stack<task*> g_readwrite;
 static int g_listen_fd = -1;
 
-
-
 //设置非阻塞Socket
 static int SetNonBlock(int iSock)
 {
@@ -49,10 +47,6 @@ static int SetNonBlock(int iSock)
     int ret = fcntl(iSock, F_SETFL, iFlags);
     return ret;
 }
-
-
-
-
 //设置地址
 static void SetAddr(const char *pszIP,const unsigned short shPort,struct sockaddr_in &addr)
 {

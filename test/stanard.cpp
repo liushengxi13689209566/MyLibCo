@@ -59,13 +59,14 @@ static void *readwrite_routine(void *arg)
         }
         int fd = co->fd;
         co->fd = -1;
-
+        //进入下面是一定需要建立好　socketfd 的　
         for (;;)
         {
             struct pollfd pf = {0};
             pf.fd = fd;
             pf.events = (POLLIN | POLLERR | POLLHUP);
             co_poll(co_get_epoll_ct(), &pf, 1, 1000);
+            //将新建立的　fd　加入到　Epoll 监听中，并将控制流程返回到 main 协程
 
             int ret = read(fd, buf, sizeof(buf));
             if (ret > 0)
