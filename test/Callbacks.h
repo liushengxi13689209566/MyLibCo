@@ -8,15 +8,21 @@
 #ifndef _CALLBACKS_H
 #define _CALLBACKS_H
 #include <functional>
+#include "Timestamp.h"
 
 namespace Tattoo
 {
-using namespace  std;
+class Buffer;
+class TcpConnection;
 
 // All client visible callbacks go here.
 
 typedef std::function<void()> TimerCallback;
-
+typedef std::function<void(const TcpConnectionPtr &)> ConnectionCallback;
+typedef std::function<void(const TcpConnectionPtr &,
+						   Buffer *buf,
+						   Timestamp)>
+	MessageCallback;
 
 //协程函数
 typedef void *(*RoutineFun)(void *);

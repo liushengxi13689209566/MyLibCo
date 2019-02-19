@@ -30,6 +30,7 @@ struct task_t
 
 static stack<task_t *> g_readwrite;
 static int g_listen_fd = -1;
+
 static int SetNonBlock(int iSock)
 {
     int iFlags;

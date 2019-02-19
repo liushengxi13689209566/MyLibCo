@@ -120,7 +120,7 @@ void Epoll::update(int operation, Channel *channel)
     struct epoll_event event;
     bzero(&event, sizeof(event));
     event.events = channel->events();
-    event.data.ptr = channel;
+    event.data.ptr = channel; //channel 对应　Routine_t ,直接唤醒对应协程
     int fd = channel->fd();
     ::epoll_ctl(epollfd_, operation, fd, &event);
 }
