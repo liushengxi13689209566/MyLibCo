@@ -23,6 +23,7 @@
 #include "routine.h"
 #include "routine.cpp"
 #include <stack>
+#include "debug.h"
 
 using namespace std;
 struct task_t
@@ -92,6 +93,8 @@ static int CreateTcpSocket(const unsigned short shPort = 0, const char *pszIP = 
 
 static void *readwrite_routine(void *arg)
 {
+	INFO("进入 readwrite_routine()");
+
 	task_t *tsk = (task_t *)arg;
 	char buf[1024 * 10];
 	for (;;)
@@ -100,10 +103,10 @@ static void *readwrite_routine(void *arg)
 		if (tsk->fd == -1)
 		{
 			g_readwrite.push(tsk);
+			INFO("调用 Yield()");
 			get_curr_routine()->Yield();
 			continue;
 		}
-
 		//设置为-1表示已读，方便协程下次循环退出
 		int fd = tsk->fd;
 		tsk->fd = -1;
