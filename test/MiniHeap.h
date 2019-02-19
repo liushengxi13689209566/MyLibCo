@@ -5,25 +5,29 @@
 	> Created Time: 2019年01月22日 星期二 16时49分00秒
  ************************************************************************/
 
-#ifndef _TIME_HEAP_H
-#define _TIME_HEAP_H
+#ifndef _MINIHEAP_H
+#define _MINIHEAP_H
 #include <map>
 #include <vector>
 #include "Timestamp.h"
 #include "Callbacks.h"
 #include "Channel.h"
+#include "EventLoop.h"
 
 namespace Tattoo
 {
+class EventLoop;
+class Channel;
+
 /*定时器类*/
 class Timer
 {
-  public:
+public:
 	Timer(const TimerCallback &cb, Timestamp when, int interval)
-		: callback_(cb),
-		  expire_(when),
-		  interval_(interval),
-		  repeat_(interval > 0.0)
+			: callback_(cb),
+				expire_(when),
+				interval_(interval),
+				repeat_(interval > 0.0)
 	{
 	}
 	Timestamp expiration() const { return expire_; }
@@ -46,8 +50,8 @@ class Timer
 		callback_();
 	}
 
-  private:
-	Timestamp expire_;			   //任务的超时事件
+private:
+	Timestamp expire_;						 //任务的超时事件
 	const TimerCallback callback_; // 回调函数
 	const double interval_;
 	const bool repeat_;
@@ -55,7 +59,7 @@ class Timer
 
 class TimeHeap
 {
-  public:
+public:
 	TimeHeap(EventLoop *loop);
 	~TimeHeap();
 
@@ -63,7 +67,7 @@ class TimeHeap
 	//FIXME:
 	// void cancel(TimerId timerId);
 
-  private:
+private:
 	typedef std::pair<Timestamp, Timer *> Entry;
 	typedef std::multimap<Timestamp, Timer *> TimerMap;
 
@@ -79,6 +83,7 @@ class TimeHeap
 
 	EventLoop *loop_;
 	const int timerfd_;
+
 	Channel timerfdChannel_;
 	// Timer list sorted by expiration
 	TimerMap timers_;

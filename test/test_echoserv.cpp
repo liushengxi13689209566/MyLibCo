@@ -115,9 +115,10 @@ static void *readwrite_routine(void *arg)
 			// env.data.fd = fd;
 			// env.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
 			// int epollret = get_curr_thread_env()->epoll_->addEpoll(&env, 1, revents, 10);
-			
-			Channel chan(get_curr_thread_env()->envEventLoop_,g_listen_fd);
-			chan.update(); //注册事件，并退出
+
+			Channel chan(get_curr_thread_env()->envEventLoop_, fd);
+			chan.addEpoll(); //注册事件，并退出 yield()
+			// data.ptr 对应　channel ,而　channel 中要对应 Routine_t ,这样当有数据什么的到来时，就直接唤醒对应的协程即可
 
 			int ret = read(fd, buf, sizeof(buf));
 			if (ret > 0)
@@ -152,7 +153,7 @@ static void *accept_routine(void *)
 			// ev.data.fd = g_listen_fd;
 			// ev.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
 			// struct epoll_event revents[10];
-			chan.update(); //注册事件，并退出
+			chan.addEpoll(); //注册事件，并退出 yield() 
 
 			// int epollret = get_curr_thread_env()->epoll_->addEpoll(&ev, 1, revents, 10);
 			continue;

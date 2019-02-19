@@ -16,16 +16,13 @@
 
 // #include "routine.cpp"
 
-// 这是Reactor模式的核心，每个Reactor线程内部调用一个EventLoop，
-// 内部不停的进行poll或者epoll_wait调用，然后根据fd的返回事件，
-// 调用fd对应Channel的相应回调函数./test
-
 namespace Tattoo
 {
 
 class Channel;
 class Epoll;
 class TimeHeap;
+class RoutineEnv_t;
 
 class EventLoop
 {

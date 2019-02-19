@@ -22,7 +22,7 @@ EventLoop::EventLoop()
 	  timerHeap_(new TimeHeap(this))
 {
 	std::cout << "EventLoop created " << this << std::endl;
-	rouEnv＿->envEventLoop＿ = this; //目前的关键点
+	rouEnv_->envEventLoop_ = this; //目前的关键点
 }
 EventLoop::~EventLoop()
 {

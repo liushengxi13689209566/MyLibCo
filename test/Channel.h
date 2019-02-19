@@ -10,15 +10,17 @@
 // #include "noncopyable.h"
 #include <functional>
 #include <ctime>
-#include"EventLoop.h"
+#include "EventLoop.h"
 
-// #include"routine.h"
+#include"routine.h"
 
 namespace Tattoo
 {
 
 using namespace std;
 class EventLoop;
+class Routine_t;
+
 
 class Channel
 {
@@ -51,6 +53,7 @@ class Channel
 	void set_revents(int revt) { revents_ = revt; } // used by epoll
 	bool isNoneEvent() const { return events_ == kNoneEvent; }
 
+	void addEpoll();
 	void enableReading()
 	{
 		events_ |= kReadEvent;
@@ -87,11 +90,11 @@ class Channel
 	int index_;   //  used by Poller
 
 	// bool addToLoop_;
-	// Routine_t *rou_; //与　Routine_t　对应
 
 	EventCallback readCallback_;
 	EventCallback writeCallback_;
 	EventCallback errorCallback_;
+	Routine_t *channelRoutine_;
 };
 } // namespace Tattoo
 #endif

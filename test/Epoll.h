@@ -13,6 +13,7 @@
 #include "Callbacks.h"
 #include <sys/epoll.h>
 #include "EventLoop.h"
+#include "Channel.h"
 
 namespace Tattoo
 {
@@ -34,7 +35,7 @@ class Epoll
 
 	void update(int operation, Channel *channel);
 	static const char *operationToString(int op);
-	
+
 	typedef std::vector<struct epoll_event> EpollEventList;
 	typedef std::map<int, Channel *> ChannelMap; //key是文件描述符，value是Channel *
 

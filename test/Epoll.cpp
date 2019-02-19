@@ -91,7 +91,6 @@ void Epoll::updateChannel(Channel *channel)
             assert(channels_.find(fd) != channels_.end());
             assert(channels_[fd] == channel);
         }
-
         channel->set_index(kAdded);
         update(EPOLL_CTL_ADD, channel);
     }
