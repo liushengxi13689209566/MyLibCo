@@ -39,17 +39,18 @@ Channel::~Channel()
 }
 void Channel::update()
 {
-    printf("index_ == %d\n", index_);
+    // printf("index_ == %d\n", index_);
     loop_->updateChannel(this);
 }
 
 void Channel::handleEvent()
 {
+    //需要　特殊处理　timerfd 时间
+
     // if (revents_ & POLLNVAL)
     // {
     //     std::cout << "Channel::handle_event() POLLNVAL" << std::endl;
     // }
-
     // if (revents_ & (POLLERR | POLLNVAL))
     // {
     //     if (errorCallback_)
@@ -72,12 +73,12 @@ void Channel::handleEvent()
 }
 void Channel::addEpoll()
 {
-    printf("index_ == %d\n", index_);
+    // printf("index_ == %d\n", index_);
     events_ |= kReadEvent;
     events_ |= kWriteEvent;
     //Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
     update();
-    printf("index_ == %d\n", index_);
+    // printf("index_ == %d\n", index_);
 
     //退出当前协程
     get_curr_routine()->Yield();
