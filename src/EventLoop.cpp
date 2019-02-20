@@ -70,3 +70,7 @@ void EventLoop::updateChannel(Channel *channel)
 {
 	epoll_->updateChannel(channel);
 }
+void EventLoop::removeChannel(Channel *channel)
+{
+	epoll_->removeChannel(channel);
+}

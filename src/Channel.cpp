@@ -2,6 +2,7 @@
 #include "Channel.h"
 #include <iostream>
 #include <poll.h>
+#include <stdio.h>
 /*　
     POLLIN 　　　　　　　　有数据可读。
 
@@ -38,6 +39,7 @@ Channel::~Channel()
 }
 void Channel::update()
 {
+    printf("index_ == %d\n", index_);
     loop_->updateChannel(this);
 }
 
@@ -70,11 +72,15 @@ void Channel::handleEvent()
 }
 void Channel::addEpoll()
 {
-    enableReading();
-    enableWriting();
+    printf("index_ == %d\n", index_);
+    events_ |= kReadEvent;
+    events_ |= kWriteEvent;
     //Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
     update();
+    printf("index_ == %d\n", index_);
+
     //退出当前协程
     get_curr_routine()->Yield();
     // fixme 删除加入的　epoll 信息
+    loop_->removeChannel(this);
 }

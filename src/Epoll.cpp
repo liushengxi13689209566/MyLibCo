@@ -117,7 +117,25 @@ void Epoll::updateChannel(Channel *channel)
         }
     }
 }
+void Epoll::removeChannel(Channel *channel)
+{
+    int fd = channel->fd();
+    // LOG_TRACE << "fd = " << fd;
+    assert(channels_.find(fd) != channels_.end());
+    assert(channels_[fd] == channel);
+    // assert(channel->isNoneEvent());
+    int index = channel->index();
+    assert(index == kAdded || index == kDeleted);
+    size_t n = channels_.erase(fd);
+    (void)n;
+    assert(n == 1);
 
+    if (index == kAdded)
+    {
+        update(EPOLL_CTL_DEL, channel);
+    }
+    channel->set_index(kNew);
+}
 void Epoll::update(int operation, Channel *channel)
 {
     struct epoll_event event;
