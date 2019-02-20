@@ -13,7 +13,7 @@
 
 using namespace Tattoo;
 
-const int kPollTimeMs = 10000;
+const int kPollTimeMs = 10000; // 10 s
 
 EventLoop::EventLoop()
 	: looping_(false),
@@ -34,7 +34,7 @@ void EventLoop::loop()
 	while (1)
 	{
 		activeChannels_.clear();
-		epoll_->poll(kPollTimeMs, &activeChannels_);
+		int ret = epoll_->poll(kPollTimeMs, &activeChannels_);
 
 		for (auto it = activeChannels_.begin();
 			 it != activeChannels_.end(); ++it)

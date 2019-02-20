@@ -1,6 +1,6 @@
 
 #include "Epoll.h"
-// #include "Log.h"
+#include <stdio.h>
 // #include "routine.h"
 
 #include <sys/epoll.h>
@@ -31,7 +31,7 @@ Epoll::~Epoll()
     ::close(epollfd_);
 }
 
-Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
+int Epoll::poll(int timeoutMs, ChannelList *activeChannels)
 {
     //调用epoll_wait
     //events是一个Epoll中 struct epoll_event的vector私有变量
@@ -40,7 +40,10 @@ Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
                                  static_cast<int>(events_.size()),
                                  timeoutMs);
     int savedErrno = errno;
-    Timestamp now(Timestamp::now());
+
+    printf("numEvents== %d \n", numEvents);
+
+    // Timestamp now(Timestamp::now());
     if (numEvents > 0)
     {
         //更新Channel列表
@@ -59,6 +62,7 @@ Timestamp Epoll::poll(int timeoutMs, ChannelList *activeChannels)
         //     LOG_SYSERR << "Epoll::poll()";
         // }
     }
+    return numEvents;
 }
 //更新事件列表
 void Epoll::fillActiveChannels(int numEvents,
@@ -73,7 +77,7 @@ void Epoll::fillActiveChannels(int numEvents,
         activeChannels->push_back(channel);      //添加进就绪事件合集
     }
 }
-//　更新　
+// 更新　
 void Epoll::updateChannel(Channel *channel)
 {
     const int index = channel->index();

@@ -25,7 +25,7 @@ class Epoll
 	Epoll(EventLoop *loop);
 	~Epoll();
 
-	Timestamp poll(int timeoutMs, ChannelList *activeChannels);
+	int poll(int timeoutMs, ChannelList *activeChannels);
 
 	void updateChannel(Channel *channel);
 

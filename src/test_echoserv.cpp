@@ -108,6 +108,8 @@ static void *readwrite_routine(void *arg)
 			continue;
 		}
 		//设置为-1表示已读，方便协程下次循环退出
+		INFO("come back to readWrite routine() ");
+
 		int fd = tsk->fd;
 		tsk->fd = -1;
 		//不断监听
@@ -120,8 +122,11 @@ static void *readwrite_routine(void *arg)
 			// int epollret = get_curr_thread_env()->epoll_->addEpoll(&env, 1, revents, 10);
 
 			Channel chan(get_curr_thread_env()->envEventLoop_, fd);
-			chan.addEpoll(); //注册事件，并退出 yield()
+			chan.addEpoll();
+			//注册事件，并退出 yield()
+
 			// data.ptr 对应　channel ,而　channel 中要对应 Routine_t ,这样当有数据什么的到来时，就直接唤醒对应的协程即可
+			INFO("注册事件，并退出 readWrite routine() ,返回　main 函数");
 
 			int ret = read(fd, buf, sizeof(buf));
 			if (ret > 0)
@@ -148,7 +153,7 @@ static void *accept_routine(void *)
 		memset(&addr, 0, sizeof(addr));
 		socklen_t len = sizeof(addr);
 		int fd = accept(g_listen_fd, (struct sockaddr *)&addr, &len);
-		printf("accept fd == %d\n",fd);
+		printf("accept fd == %d\n", fd); //重复添加了 g_listen_fd  导致服务器退出
 		if (fd < 0)
 		{
 			Channel chan(get_curr_thread_env()->envEventLoop_, g_listen_fd);
@@ -157,10 +162,9 @@ static void *accept_routine(void *)
 			// ev.events = (EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLET);
 			// struct epoll_event revents[10];
 			chan.addEpoll(); //注册事件，并退出 yield()
-
-			// int epollret = get_curr_thread_env()->epoll_->addEpoll(&ev, 1, revents, 10);
 			continue;
 		}
+		// fd > 0
 		if (g_readwrite.empty())
 		{
 			close(fd);
@@ -174,8 +178,11 @@ static void *accept_routine(void *)
 		//取出最顶端的空闲协程执行对应的 fd 读写
 		task_t *tsk = g_readwrite.top();
 		tsk->fd = fd;
-		tsk->routine->Resume();
 		g_readwrite.pop();
+
+		INFO("调用Resume()函数");
+
+		tsk->routine->Resume();
 	}
 }
 
