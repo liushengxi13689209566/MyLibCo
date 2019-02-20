@@ -148,6 +148,7 @@ static void *accept_routine(void *)
 		memset(&addr, 0, sizeof(addr));
 		socklen_t len = sizeof(addr);
 		int fd = accept(g_listen_fd, (struct sockaddr *)&addr, &len);
+		printf("accept fd == %d\n",fd);
 		if (fd < 0)
 		{
 			Channel chan(get_curr_thread_env()->envEventLoop_, g_listen_fd);

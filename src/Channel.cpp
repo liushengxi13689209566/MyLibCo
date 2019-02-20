@@ -2,7 +2,23 @@
 #include "Channel.h"
 #include <iostream>
 #include <poll.h>
+/*　
+    POLLIN 　　　　　　　　有数据可读。
 
+　　POLLRDNORM 　　　　  有普通数据可读。
+
+　　POLLRDBAND　　　　　 有优先数据可读。
+
+　　POLLPRI　　　　　　　　 有紧迫数据可读。
+
+　　POLLOUT　　　　　　      写数据不会导致阻塞。
+
+　　POLLWRNORM　　　　　  写普通数据不会导致阻塞。
+
+　　POLLWRBAND　　　　　   写优先数据不会导致阻塞。
+
+　　POLLMSGSIGPOLL 　　　　消息可用。
+*/
 using namespace Tattoo;
 
 const int Channel::kNoneEvent = 0;
@@ -47,13 +63,15 @@ void Channel::handleEvent()
     //     if (writeCallback_)
     //         writeCallback_();
     // }
-    
+
     // 当有事件当来时直接唤醒对应的协程即可　
-    if(channelRoutine_)
+    if (channelRoutine_)
         channelRoutine_->Resume();
 }
 void Channel::addEpoll()
 {
+    enableReading();
+    enableWriting();
     //Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
     update();
     //退出当前协程
