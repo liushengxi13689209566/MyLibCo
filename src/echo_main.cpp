@@ -17,35 +17,26 @@ using namespace Tattoo;
 
 void onConnection(void *)
 {
-	std::cout << "a new connection " << std::endl;
+	std::cout << " a new connection " << std::endl;
 }
 
 void onMessage(const int fd)
 {
-	char buf[1204 * 16] = {0};
-	int ret = read(fd, buf, sizeof(buf));
-	if (ret > 0)
-	{
-		ret = write(fd, buf, ret);
-		std::cout << "message :: " << buf << std::endl;
-	}
-	else
-	{
-		close(fd);
-	}
+	std::cout << " get a message " << std::endl;
 }
 int main(int argc, char *argv[])
 {
 	printf("main(): pid = %d\n", getpid());
 	//ip   = 127.0.0.1
 	//port = 9981
-	if (argc <= 2)
+	int port = 9981;
+	char *ip = "127.0.0.1";
+	
+	if (argc > 1)
 	{
-		cout << "usage : " << basename(argv[0]) << "   ip_address    port_number   " << endl;
-		return 1;
+		ip = argv[1];
+		port = atoi(argv[2]);
 	}
-	const char *ip = argv[1];
-	const int port = atoi(argv[2]);
 
 	//2  进程　
 	//10 协程

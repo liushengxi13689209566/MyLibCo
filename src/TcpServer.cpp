@@ -173,6 +173,19 @@ void *TcpServer::readwrite_routine(void *arg)
 			{
 				tsk->tcpServer_->messageCallback_(fd);
 			}
+
+			int ret = read(fd, buf, sizeof(buf));
+			if (ret > 0)
+			{
+				ret = write(fd, buf, ret);
+				std::cout << "message :: " << buf << std::endl;
+			}
+			if (ret > 0 || (-1 == ret && EAGAIN == errno))
+			{
+				continue;
+			}
+			close(fd);
+			break;
 		}
 	}
 }
