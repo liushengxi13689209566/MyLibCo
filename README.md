@@ -1,12 +1,13 @@
 
 简体中文 | [English](./README.zh-English.md) 
 
-<h1 align="center"> MyLibCo </h1>
 
 <div align="center">
 
+![](https://github.com/liushengxi13689209566/MyLibCo/blob/master/image/LOGO.png)
 
-A C++ network library for high concurrent server in Linux by routine.
+
+A C++ network library for high concurrent server in Linux  by Coroutine.
 
 一个基于 Reactor 模式，使用协程开发的多进程/线程-协程模式工作的 C++ 网络库.
 
