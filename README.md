@@ -56,9 +56,13 @@ server.start();
 
 ```
     git clone git@github.com:liushengxi13689209566/MyLibCo.git 
+
     cd MyLibCo/src
+
     make 
+
     ./echo_main 
+    
 ```
 
 ## 具体使用方法:
