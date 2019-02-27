@@ -11,7 +11,12 @@ A C++ network library for high concurrent server in Linux  by Coroutine.
 
 一个基于 Reactor 模式，使用协程开发的多进程/线程-协程模式工作的 C++ 网络库.
 
-![](https://img.shields.io/badge/release-v1.0-blue.svg)
+[![](https://img.shields.io/badge/release-v1.0-blue.svg)]
+[![](https://img.shields.io/badge/build-passing-green.svg)]
+[![](https://img.shields.io/badge/dependencies-up%20to%20date-green.svg)]
+[![](https://img.shields.io/badge/license-MIT-blue.svg)]
+
+
 
 
 </div>
