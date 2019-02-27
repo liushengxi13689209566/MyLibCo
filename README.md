@@ -3,7 +3,6 @@ English | [简体中文](./README.zh-CN.md)
 
 <h1 align="center"> MyLibCo </h1>
 
-<div align="center">
 
 
 A C++ network library for high concurrent server in Linux by libco .
