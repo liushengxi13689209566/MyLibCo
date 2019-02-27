@@ -45,20 +45,23 @@ server.start();
 -----
 
 ## 特性:
+
 - 网络模块采用 muduo 单线程的 Reactor 方案。
 - 使用 timerfd 实现高性能时间堆定时器，并将其统一到 EventLoop 中。
-- 可选的共享栈模式，单机轻松接入千万连接
-- 
-- 
+- 可选的共享栈模式，单机轻松接入千万连接。
+- 使用 汇编 实现任务之间的切换，保存上下文信息的功能。
+- 无需侵入业务逻辑，把多进程、多线程服务改造成协程服务，并发能力得到巨大提升。
 
-## 运行环境:
-    - OS: Linux
-    - 
+## 安装说明:
 
-## 系列分析文章:
+```
+    git clone git@github.com:liushengxi13689209566/MyLibCo.git 
+    cd MyLibCo/src
+    make 
+    ./echo_main 
+```
 
-
-## 使用方法:
+## 具体使用方法:
 
 ```cpp
 #include <iostream>
@@ -71,11 +74,11 @@ void onConnection(void *)
 {
 	std::cout << " a new connection " << std::endl;
 }
-
 void onMessage(const int fd)
 {
 	std::cout << " get a message " << std::endl;
 }
+
 int main(int argc, char *argv[])
 {
 	printf("main(): pid = %d\n", getpid());
@@ -88,17 +91,24 @@ int main(int argc, char *argv[])
 		ip = argv[1];
 		port = atoi(argv[2]);
 	}
-
-	//2  进程　
-	//10 协程
+	/*
+        创建一个　server，里面包含2个进程，每个进程中又拥有10个协程
+    */
 	TcpServer server(ip, port, 2, 10);
 	server.setConnectionCallback(onConnection);
 	server.setMessageCallback(onMessage);
 	server.start();
 }
+
 ```
+这里放一个　gif 的图片
+
 ![运行结果](https://github.com/liushengxi13689209566/MyLibCo/blob/master/image/frist.png)
 
-PS:明天会完善　readme
 
 
+## 运行环境:
+    - OS: Linux
+    - 
+
+## 系列分析文章:
