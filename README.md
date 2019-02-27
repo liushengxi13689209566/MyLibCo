@@ -6,7 +6,9 @@
 <div align="center">
 
 
-A C++ network library for high concurrent server in Linux by libco .
+A C++ network library for high concurrent server in Linux by routine.
+
+一个基于 Reactor 模式，使用协程开发的多进程/线程-协程模式工作的 C++ 网络库.
 
 </div>
 
