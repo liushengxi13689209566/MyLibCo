@@ -55,13 +55,13 @@ server.start();
 ## 安装与使用:
 
 ```
-    git clone git@github.com:liushengxi13689209566/MyLibCo.git 
+    $ git clone git@github.com:liushengxi13689209566/MyLibCo.git 
 
-    cd MyLibCo/src
+    $ cd MyLibCo/src
 
-    make 
+    $ make 
 
-    ./echo_main 
+    $ ./echo_main 
     
 ```
 

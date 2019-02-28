@@ -78,8 +78,8 @@ LINKS += -std=c++11 -g -L./lib -lcolib -lpthread -ldl
 #生成静态库和动态库时需要的文件
 COLIB_OBJS= routine.o  coctx_swap.o coctx.o 
 
-PROGS = colib test_hello  test_echoserv echo_main
-#  test4
+PROGS = colib test_hello  echo_main
+#  test_echoserv 
 # liu_EchoServer test_shareStack
 # example_poll  example_echocli example_thread  example_cond example_specific example_copystack example_closure 
 
@@ -119,8 +119,8 @@ test_hello:test_hello.o
 # 	$(BUILDEXE)
 # test4:test4.o
 	# $(BUILDEXE) 
-test_echoserv:test_echoserv.o
-	$(BUILDEXE) 
+# test_echoserv:test_echoserv.o
+	# $(BUILDEXE) 
 echo_main:echo_main.o
 	$(BUILDEXE) 
 

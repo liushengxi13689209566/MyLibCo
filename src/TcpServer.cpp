@@ -136,7 +136,7 @@ void *TcpServer::accept_routine(void *arg)
 		tsk->fd = fd;
 		g_readwrite.pop();
 
-		INFO("调用Resume()函数");
+		// INFO("调用Resume()函数");
 
 		tsk->routine->Resume();
 	}
@@ -152,19 +152,19 @@ void *TcpServer::readwrite_routine(void *arg)
 		if (tsk->fd == -1)
 		{
 			g_readwrite.push(tsk);
-			INFO("调用 Yield()");
+			// INFO("调用 Yield()");
 			get_curr_routine()->Yield();
 			continue;
 		}
 		//设置为-1表示已读，方便协程下次循环退出
-		INFO("come back to readWrite routine() ");
+		// INFO("come back to readWrite routine() ");
 
 		int fd = tsk->fd;
 		tsk->fd = -1;
 		for (;;)
 		{
 			Channel chan(get_curr_thread_env()->envEventLoop_, fd);
-			INFO("注册事件，并退出 readWrite routine() ,返回　main 函数");
+			// INFO("注册事件，并退出 readWrite routine() ,返回　main 函数");
 			chan.addEpoll();
 			//注册事件，并退出 yield()
 			// data.ptr 对应　channel ,而　channel 中要对应 Routine_t ,这样当有数据什么的到来时，就直接唤醒对应的协程即可
