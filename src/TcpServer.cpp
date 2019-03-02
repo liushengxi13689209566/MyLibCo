@@ -169,10 +169,10 @@ void *TcpServer::readwrite_routine(void *arg)
 			//注册事件，并退出 yield()
 			// data.ptr 对应　channel ,而　channel 中要对应 Routine_t ,这样当有数据什么的到来时，就直接唤醒对应的协程即可
 
-			if (tsk->tcpServer_->messageCallback_)
-			{
-				tsk->tcpServer_->messageCallback_(fd);
-			}
+			// if (tsk->tcpServer_->messageCallback_)
+			// {
+			// 	tsk->tcpServer_->messageCallback_(fd);
+			// }
 
 			int ret = read(fd, buf, sizeof(buf));
 			if (ret > 0)

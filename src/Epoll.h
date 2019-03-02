@@ -20,32 +20,39 @@ namespace Tattoo
 class Epoll
 {
   public:
-	typedef std::vector<Channel *> ChannelList;
+    typedef std::vector<Channel *> ChannelList;
 
-	Epoll(EventLoop *loop);
-	~Epoll();
+    Epoll(EventLoop *loop);
+    ~Epoll();
 
-	int poll(int timeoutMs, ChannelList *activeChannels);
+    int poll(int timeoutMs, ChannelList *activeChannels);
 
-	void updateChannel(Channel *channel);
-	void removeChannel(Channel *channel);
+    void updateChannel(Channel *channel);
+    void removeChannel(Channel *channel);
+    bool isExist(Channel *channel)
+    {
+        if (channels_.find(channel->fd()) != channels_.end())
+            return true;
+        else
+            return false;
+    }
 
   private:
-	void fillActiveChannels(int numEvents,
-							ChannelList *activeChannels) const;
+    void fillActiveChannels(int numEvents,
+                            ChannelList *activeChannels) const;
 
-	void update(int operation, Channel *channel);
-	static const char *operationToString(int op);
+    void update(int operation, Channel *channel);
+    static const char *operationToString(int op);
 
-	typedef std::vector<struct epoll_event> EpollEventList;
-	typedef std::map<int, Channel *> ChannelMap; //key是文件描述符，value是Channel *
+    typedef std::vector<struct epoll_event> EpollEventList;
+    typedef std::map<int, Channel *> ChannelMap; //key是文件描述符，value是Channel *
 
-	static const int kInitEventListSize = 1024;
-	int epollfd_;
+    static const int kInitEventListSize = 1024;
+    int epollfd_;
 
-	EventLoop *owerLoop_;
-	EpollEventList events_;
-	ChannelMap channels_;
+    EventLoop *owerLoop_;
+    EpollEventList events_;
+    ChannelMap channels_;
 };
 } // namespace Tattoo
 #endif

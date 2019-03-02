@@ -105,14 +105,20 @@ int main(int argc, char *argv[])
 }
 
 ```
-这里放一个　gif 的图片
+## 运行结果:
 
-![运行结果](https://github.com/liushengxi13689209566/MyLibCo/blob/master/image/frist.png)
+- 服务器：
+
+![](https://github.com/liushengxi13689209566/MyLibCo/blob/master/image/testSerever.png)
+
+- 三个测试客户端：
+
+![](https://github.com/liushengxi13689209566/MyLibCo/blob/master/image/testClient.png)
 
 
 
 ## 运行环境:
     - OS: Linux
-    - 
 
 ## 系列分析文章:
+    [协程](https://blog.csdn.net/liushengxi_root/column/info/33275)

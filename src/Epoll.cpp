@@ -41,7 +41,7 @@ int Epoll::poll(int timeoutMs, ChannelList *activeChannels)
                                  timeoutMs);
     int savedErrno = errno;
 
-    printf("numEvents== %d \n", numEvents);
+    // printf("numEvents== %d \n", numEvents);
 
     // Timestamp now(Timestamp::now());
     if (numEvents > 0)

@@ -16,61 +16,64 @@ using namespace Tattoo;
 const int kPollTimeMs = 10000; // 10 s
 
 EventLoop::EventLoop()
-	: looping_(false),
-	  rouEnv_(get_curr_thread_env()), //  初始化　routine_env 结构
-	  epoll_(new Epoll(this)),
-	  timerHeap_(new TimeHeap(this))
+    : looping_(false),
+      rouEnv_(get_curr_thread_env()), //  初始化　routine_env 结构
+      epoll_(new Epoll(this)),
+      timerHeap_(new TimeHeap(this))
 {
-	std::cout << "EventLoop created " << this << std::endl;
-	rouEnv_->envEventLoop_ = this; //目前的关键点
+    // std::cout << "EventLoop created " << this << std::endl;
+    rouEnv_->envEventLoop_ = this; //目前的关键点
 }
 EventLoop::~EventLoop()
 {
 }
-
 void EventLoop::loop()
 {
-	looping_ = true;
-	while (1)
-	{
-		activeChannels_.clear();
-		int ret = epoll_->poll(kPollTimeMs, &activeChannels_);
+    looping_ = true;
+    while (1)
+    {
+        activeChannels_.clear();
+        int ret = epoll_->poll(kPollTimeMs, &activeChannels_);
 
-		for (auto it = activeChannels_.begin();
-			 it != activeChannels_.end(); ++it)
-		{
-			(*it)->handleEvent(); //事件分发
-		}
-	}
+        for (auto it = activeChannels_.begin();
+             it != activeChannels_.end(); ++it)
+        {
+            (*it)->handleEvent(); //事件分发
+        }
+    }
 
-	std::cout << "EventLoop " << this << " stop looping" << std::endl;
-	looping_ = false;
+    std::cout << "EventLoop " << this << " stop looping" << std::endl;
+    looping_ = false;
 }
 void EventLoop::runAt(const Timestamp &time, const TimerCallback &cb)
 {
-	timerHeap_->addTimer(cb, time, 0.0);
+    timerHeap_->addTimer(cb, time, 0.0);
 }
 
 void EventLoop::runAfter(double delay, const TimerCallback &cb)
 {
-	Timestamp time(addTime(Timestamp::now(), delay));
-	runAt(time, cb);
+    Timestamp time(addTime(Timestamp::now(), delay));
+    runAt(time, cb);
 }
 
 void EventLoop::runEvery(double interval, const TimerCallback &cb)
 {
-	Timestamp time(addTime(Timestamp::now(), interval));
-	timerHeap_->addTimer(cb, time, interval);
+    Timestamp time(addTime(Timestamp::now(), interval));
+    timerHeap_->addTimer(cb, time, interval);
 }
 void EventLoop::runInLoop(const Functor &cb)
 {
-	cb();
+    cb();
 }
 void EventLoop::updateChannel(Channel *channel)
 {
-	epoll_->updateChannel(channel);
+    epoll_->updateChannel(channel);
 }
 void EventLoop::removeChannel(Channel *channel)
 {
-	epoll_->removeChannel(channel);
+    epoll_->removeChannel(channel);
+}
+bool EventLoop::isExist(Channel *channel)
+{
+    epoll_->isExist(channel);
 }

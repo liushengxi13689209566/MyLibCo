@@ -69,6 +69,7 @@ class EventLoop
 	// internal use only
 	void updateChannel(Channel *channel);
 	void removeChannel(Channel* channel);
+    bool isExist(Channel *channel);
 
   private:
 	typedef std::vector<Channel *> ChannelList;

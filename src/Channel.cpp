@@ -74,14 +74,26 @@ void Channel::handleEvent()
 void Channel::addEpoll()
 {
     // printf("index_ == %d\n", index_);
-    events_ |= kReadEvent;
-    events_ |= kWriteEvent;
-    //Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
-    update();
-    // printf("index_ == %d\n", index_);
+    // usleep(1000);
+    //如果已经存在，就什么都不做
+    if (!loop_->isExist(this))
+    {
+        events_ |= kReadEvent;
+        events_ |= kWriteEvent;
+        //Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
+        update();
+        // printf("index_ == %d\n", index_);
 
-    //退出当前协程
-    get_curr_routine()->Yield();
-    // fixme 删除加入的　epoll 信息
-    loop_->removeChannel(this);
+        //退出当前协程
+        get_curr_routine()->Yield();
+        // fixme 删除加入的　epoll 信息
+        loop_->removeChannel(this);
+    }
+    else
+    {
+        //退出当前协程
+        get_curr_routine()->Yield();
+        // fixme 删除加入的　epoll 信息
+        loop_->removeChannel(this);
+    }
 }
