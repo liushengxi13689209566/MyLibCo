@@ -6,13 +6,10 @@
  ************************************************************************/
 
 #include <iostream>
-#include "TcpServer.h"
-#include "TcpServer.cpp"
-
-#include <iostream>
 #include <unistd.h>
 #include <stdio.h>
-
+#include "TcpServer.h"
+#include "TcpServer.cpp"
 using namespace Tattoo;
 
 void onConnection(void *)
@@ -26,8 +23,6 @@ void onMessage(const int fd)
 }
 int main(int argc, char *argv[])
 {
-    //ip   = 127.0.0.1
-    //port = 9981
     int port = 9981;
     char *ip = "127.0.0.1";
 
@@ -36,13 +31,12 @@ int main(int argc, char *argv[])
         ip = argv[1];
         port = atoi(argv[2]);
     }
-
-    //2  进程　
-    //10 协程
     printf("main(): pid == %d, %s:%d\n", getpid(), ip, port);
 
+    //创建一个　server，里面包含2个进程，每个进程中又拥有10个协程
     TcpServer server(ip, port, 2, 10);
     server.setConnectionCallback(onConnection);
     server.setMessageCallback(onMessage);
     server.start();
+    return 0;
 }
