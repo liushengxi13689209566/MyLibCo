@@ -26,7 +26,7 @@ class Timer
     Timestamp expiration() const { return expire_; }
     void run() const;
 
-    Timestamp expire_; //任务的超时事件
+    Timestamp expire_; //任务的超时时间
     Routine_t *timer_rou_;
 };
 
@@ -42,12 +42,10 @@ class TimeHeap
   private:
     typedef std::pair<Timestamp, Timer *> Entry;
     typedef std::multimap<Timestamp, Timer *> TimerMap;
-
-    void addTimerInLoop(Timer *timer);
-    // called when timerfd alarms
+    // 超时之后的可读回调
     void handleRead();
-    // move out all expired timers
     std::vector<Entry> getExpired(Timestamp now);
+    
     /* 重置超时的定时器 */
     void reset(const std::vector<Entry> &expired, Timestamp now);
 

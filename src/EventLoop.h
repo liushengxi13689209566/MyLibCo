@@ -29,9 +29,6 @@ class EventLoop
     ~EventLoop();
 
     void loop();
-
-    Timestamp pollReturnTime() const { return pollReturnTime_; }
-
     // timers
     Timer *runAt(const Timestamp &time);
     Timer *runAfter(double delay);
@@ -44,12 +41,8 @@ class EventLoop
   private:
     typedef std::vector<Channel *> ChannelList;
 
-    bool looping_; /* atomic */
-
-    Timestamp pollReturnTime_;
     Epoll *epoll_;
     TimeHeap *timerHeap_;
-
     ChannelList activeChannels_;
     RoutineEnv_t *rouEnv_;
 };

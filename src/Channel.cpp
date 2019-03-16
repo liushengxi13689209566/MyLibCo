@@ -53,17 +53,18 @@ void Channel::handleFun()
     if (channelRoutine_)
         channelRoutine_->Resume();
 }
+//Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
 void Channel::addEpoll()
 {
-    setHandleCallback(std::bind(&Channel::handleFun,this));
+    //这里就设置的回调函数和 timerfd 设置的回调函数不一样哦
+    setHandleCallback(std::bind(&Channel::handleFun, this));
     events_ |= kReadEvent;
     events_ |= kWriteEvent;
-    //Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
     update();
-    Timer *tmp = loop_->runAfter(10);
+    Timer *tmp = loop_->runAfter(3);
     //退出当前协程
     get_curr_routine()->Yield();
-    // fixme 删除加入的　epoll 信息和定时器
+    //删除加入的　epoll 信息和对应定时器
     loop_->removeChannel(this);
     loop_->cancel(tmp);
 }

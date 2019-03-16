@@ -16,20 +16,18 @@ using namespace Tattoo;
 const int kPollTimeMs = 10000; // 10 s
 
 EventLoop::EventLoop()
-    : looping_(false),
-      rouEnv_(get_curr_thread_env()), //  初始化　routine_env 结构
+    : rouEnv_(get_curr_thread_env()), //  一个　eventloop  对应一个　Routine_env
       epoll_(new Epoll(this)),
       timerHeap_(new TimeHeap(this))
 {
     // std::cout << "EventLoop created " << this << std::endl;
-    rouEnv_->envEventLoop_ = this; //目前的关键点
+    rouEnv_->envEventLoop_ = this; //关键点
 }
 EventLoop::~EventLoop()
 {
 }
 void EventLoop::loop()
 {
-    looping_ = true;
     while (1)
     {
         activeChannels_.clear();
@@ -38,12 +36,10 @@ void EventLoop::loop()
         for (auto it = activeChannels_.begin();
              it != activeChannels_.end(); ++it)
         {
-            (*it)->handleEvent(); //事件分发
+            (*it)->handleEvent(); //事件分发,记得注册时间回调（一般就是 Resume()）
         }
     }
-
     std::cout << "EventLoop " << this << " stop looping" << std::endl;
-    looping_ = false;
 }
 Timer *EventLoop::runAt(const Timestamp &time)
 {
