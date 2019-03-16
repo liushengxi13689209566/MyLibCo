@@ -13,76 +13,45 @@
 #include <vector>
 #include <functional>
 #include "routine.h"
-
-// #include "routine.cpp"
-
 namespace Tattoo
 {
 
 class Channel;
 class Epoll;
 class TimeHeap;
+class Timer;
 class RoutineEnv_t;
 
 class EventLoop
 {
   public:
-	typedef std::function<void()> Functor;
+    EventLoop();
+    ~EventLoop();
 
-	EventLoop();
-	~EventLoop();
+    void loop();
 
-	void loop();
+    Timestamp pollReturnTime() const { return pollReturnTime_; }
 
-	Timestamp pollReturnTime() const { return pollReturnTime_; }
+    // timers
+    Timer *runAt(const Timestamp &time);
+    Timer *runAfter(double delay);
+    void cancel(Timer *timer);
 
-	/// Runs callback immediately in the loop thread.
-	/// It wakes up the loop, and run the cb.
-	/// If in the same loop thread, cb is run within the function.
-	/// Safe to call from other threads.
-	void runInLoop(const Functor &cb);
-	/// Queues callback in the loop thread.
-	/// Runs after finish pooling.
-	/// Safe to call from other threads.
-	void queueInLoop(const Functor &cb);
-
-	// timers
-
-	///
-	/// Runs callback at 'time'.
-	/// Safe to call from other threads.
-	///
-	void runAt(const Timestamp &time, const TimerCallback &cb);
-	///
-	/// Runs callback after @c delay seconds.
-	/// Safe to call from other threads.
-	///
-	void runAfter(double delay, const TimerCallback &cb);
-	///
-	/// Runs callback every @c interval seconds.
-	/// Safe to call from other threads.
-	///
-	void runEvery(double interval, const TimerCallback &cb);
-
-	// void cancel(TimerId timerId);
-
-	// internal use only
-	void updateChannel(Channel *channel);
-	void removeChannel(Channel* channel);
-    bool isExist(Channel *channel);
+    // internal use only
+    void updateChannel(Channel *channel);
+    void removeChannel(Channel *channel);
 
   private:
-	typedef std::vector<Channel *> ChannelList;
+    typedef std::vector<Channel *> ChannelList;
 
-	bool looping_; /* atomic */
+    bool looping_; /* atomic */
 
-	Timestamp pollReturnTime_;
-	Epoll *epoll_;
-	TimeHeap *timerHeap_;
+    Timestamp pollReturnTime_;
+    Epoll *epoll_;
+    TimeHeap *timerHeap_;
 
-	ChannelList activeChannels_;
-	Functor pendingFunctors_;
-	RoutineEnv_t *rouEnv_;
+    ChannelList activeChannels_;
+    RoutineEnv_t *rouEnv_;
 };
 } // namespace Tattoo
 

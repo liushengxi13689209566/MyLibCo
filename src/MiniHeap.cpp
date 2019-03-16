@@ -117,6 +117,16 @@ Timer *TimeHeap::addTimer(Timestamp when)
     }
     return timer;
 }
+/* 删除一个定时器 */
+void TimeHeap::delTimer(Timer *timer)
+{
+    auto it = timers_.find(timer->expire_);
+    if (it != timers_.end())
+    {
+        timers_.erase(it);
+    }
+    return;
+}
 //timerfd 可读 的回调
 void TimeHeap::handleRead()
 {
@@ -131,7 +141,6 @@ void TimeHeap::handleRead()
     {
         it->second->run();
     }
-
     reset(expired, now);
 }
 
@@ -164,7 +173,6 @@ void TimeHeap::reset(const std::vector<Entry> &expired, Timestamp now)
         resetTimerfd(timerfd_, nextExpire);
     }
 }
-
 bool TimeHeap::insert(Timer *timer)
 {
     bool earliestChanged = false;

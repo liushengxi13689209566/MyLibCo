@@ -45,55 +45,21 @@ void Channel::update()
 
 void Channel::handleEvent()
 {
-    //需要　特殊处理　timerfd 时间
-
-    // if (revents_ & POLLNVAL)
-    // {
-    //     std::cout << "Channel::handle_event() POLLNVAL" << std::endl;
-    // }
-    // if (revents_ & (POLLERR | POLLNVAL))
-    // {
-    //     if (errorCallback_)
-    //         errorCallback_();
-    // }
-    // if (revents_ & (POLLIN | POLLPRI | POLLRDHUP))
-    // {
-    //     if (readCallback_)
-    //         readCallback_();
-    // }
-    // if (revents_ & POLLOUT)
-    // {
-    //     if (writeCallback_)
-    //         writeCallback_();
-    // }
-
     // 当有事件当来时直接唤醒对应的协程即可　
     if (channelRoutine_)
         channelRoutine_->Resume();
 }
 void Channel::addEpoll()
 {
-    // printf("index_ == %d\n", index_);
-    // usleep(1000);
-    //如果已经存在，就什么都不做
-    if (!loop_->isExist(this))
-    {
-        events_ |= kReadEvent;
-        events_ |= kWriteEvent;
-        //Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
-        update();
-        // printf("index_ == %d\n", index_);
 
-        //退出当前协程
-        get_curr_routine()->Yield();
-        // fixme 删除加入的　epoll 信息
-        loop_->removeChannel(this);
-    }
-    else
-    {
-        //退出当前协程
-        get_curr_routine()->Yield();
-        // fixme 删除加入的　epoll 信息
-        loop_->removeChannel(this);
-    }
+    events_ |= kReadEvent;
+    events_ |= kWriteEvent;
+    //Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
+    update();
+    Timer *tmp = loop_->runAfter(1);
+    //退出当前协程
+    get_curr_routine()->Yield();
+    // fixme 删除加入的　epoll 信息和定时器
+    loop_->removeChannel(this);
+    loop_->cancel(tmp);
 }

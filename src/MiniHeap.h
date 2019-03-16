@@ -26,7 +26,6 @@ class Timer
     Timestamp expiration() const { return expire_; }
     void run() const;
 
-  private:
     Timestamp expire_; //任务的超时事件
     Routine_t *timer_rou_;
 };
@@ -38,7 +37,7 @@ class TimeHeap
     ~TimeHeap();
 
     Timer *addTimer(Timestamp when);
-    void cancel(Timer *timer);
+    void delTimer(Timer *timer);
 
   private:
     typedef std::pair<Timestamp, Timer *> Entry;

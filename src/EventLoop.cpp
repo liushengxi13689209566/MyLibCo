@@ -45,25 +45,18 @@ void EventLoop::loop()
     std::cout << "EventLoop " << this << " stop looping" << std::endl;
     looping_ = false;
 }
-void EventLoop::runAt(const Timestamp &time, const TimerCallback &cb)
+Timer *EventLoop::runAt(const Timestamp &time)
 {
-    timerHeap_->addTimer(cb, time, 0.0);
+    return timerHeap_->addTimer(time);
 }
-
-void EventLoop::runAfter(double delay, const TimerCallback &cb)
+Timer *EventLoop::runAfter(double delay)
 {
     Timestamp time(addTime(Timestamp::now(), delay));
-    runAt(time, cb);
+    runAt(time);
 }
-
-void EventLoop::runEvery(double interval, const TimerCallback &cb)
+void EventLoop::cancel(Timer *timer)
 {
-    Timestamp time(addTime(Timestamp::now(), interval));
-    timerHeap_->addTimer(cb, time, interval);
-}
-void EventLoop::runInLoop(const Functor &cb)
-{
-    cb();
+    timerHeap_->delTimer(timer);
 }
 void EventLoop::updateChannel(Channel *channel)
 {
@@ -72,8 +65,4 @@ void EventLoop::updateChannel(Channel *channel)
 void EventLoop::removeChannel(Channel *channel)
 {
     epoll_->removeChannel(channel);
-}
-bool EventLoop::isExist(Channel *channel)
-{
-    epoll_->isExist(channel);
 }
