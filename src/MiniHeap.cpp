@@ -91,7 +91,7 @@ TimeHeap::TimeHeap(EventLoop *loop)
       timerfdChannel_(loop, timerfd_),
       timers_()
 {
-    timerfdChannel_.setReadCallback(
+    timerfdChannel_.setHandleCallback(
         std::bind(&TimeHeap::handleRead, this));
     // we are always reading the timerfd, we disarm it with timerfd_settime.
     timerfdChannel_.enableReading();

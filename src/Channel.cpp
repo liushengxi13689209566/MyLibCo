@@ -45,18 +45,22 @@ void Channel::update()
 
 void Channel::handleEvent()
 {
-    // 当有事件当来时直接唤醒对应的协程即可　
+    if (handleCallback_)
+        handleCallback_();
+}
+void Channel::handleFun()
+{
     if (channelRoutine_)
         channelRoutine_->Resume();
 }
 void Channel::addEpoll()
 {
-
+    setHandleCallback(std::bind(&Channel::handleFun,this));
     events_ |= kReadEvent;
     events_ |= kWriteEvent;
     //Channel::update()->EventLoop::updateChannel(Channel*)->Poller::updateChannel(Channel*)
     update();
-    Timer *tmp = loop_->runAfter(1);
+    Timer *tmp = loop_->runAfter(10);
     //退出当前协程
     get_curr_routine()->Yield();
     // fixme 删除加入的　epoll 信息和定时器
