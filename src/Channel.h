@@ -26,8 +26,6 @@ class Channel
 {
   public:
 	typedef std::function<void()> EventCallback; // 事件回调函数
-	// typedef std::function<void(time_t)> ReadEventCallback; // 读操作回调函数，需要传入时间
-
 	Channel(EventLoop *loop, int fd);
 
 	~Channel();

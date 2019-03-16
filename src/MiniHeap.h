@@ -21,71 +21,45 @@ class EventLoop;
 /*定时器类*/
 class Timer
 {
-public:
-	Timer(const TimerCallback &cb, Timestamp when, int interval)
-			: callback_(cb),
-				expire_(when),
-				interval_(interval),
-				repeat_(interval > 0.0)
-	{
-	}
-	Timestamp expiration() const { return expire_; }
-	bool repeat() const { return repeat_; }
+  public:
+    Timer(Timestamp when);
+    Timestamp expiration() const { return expire_; }
+    void run() const;
 
-	void restart(Timestamp now)
-	{
-		if (repeat_)
-		{
-			expire_ = addTime(now, interval_);
-		}
-		else
-		{
-			expire_ = Timestamp::invalid();
-		}
-	}
-
-	void run() const
-	{
-		callback_();
-	}
-
-private:
-	Timestamp expire_;						 //任务的超时事件
-	const TimerCallback callback_; // 回调函数
-	const double interval_;
-	const bool repeat_;
+  private:
+    Timestamp expire_; //任务的超时事件
+    Routine_t *timer_rou_;
 };
 
 class TimeHeap
 {
-public:
-	TimeHeap(EventLoop *loop);
-	~TimeHeap();
+  public:
+    TimeHeap(EventLoop *loop);
+    ~TimeHeap();
 
-	void addTimer(const TimerCallback &cb, Timestamp when, double interval);
-	//FIXME:
-	// void cancel(TimerId timerId);
+    Timer *addTimer(Timestamp when);
+    void cancel(Timer *timer);
 
-private:
-	typedef std::pair<Timestamp, Timer *> Entry;
-	typedef std::multimap<Timestamp, Timer *> TimerMap;
+  private:
+    typedef std::pair<Timestamp, Timer *> Entry;
+    typedef std::multimap<Timestamp, Timer *> TimerMap;
 
-	void addTimerInLoop(Timer *timer);
-	// called when timerfd alarms
-	void handleRead();
-	// move out all expired timers
-	std::vector<Entry> getExpired(Timestamp now);
-	/* 重置超时的定时器 */
-	void reset(const std::vector<Entry> &expired, Timestamp now);
+    void addTimerInLoop(Timer *timer);
+    // called when timerfd alarms
+    void handleRead();
+    // move out all expired timers
+    std::vector<Entry> getExpired(Timestamp now);
+    /* 重置超时的定时器 */
+    void reset(const std::vector<Entry> &expired, Timestamp now);
 
-	bool insert(Timer *timer);
+    bool insert(Timer *timer);
 
-	EventLoop *loop_;
-	const int timerfd_;
+    EventLoop *loop_;
+    const int timerfd_;
 
-	Channel timerfdChannel_;
-	// Timer list sorted by expiration
-	TimerMap timers_;
+    Channel timerfdChannel_;
+    // Timer list sorted by expiration
+    TimerMap timers_;
 };
 } // namespace Tattoo
 #endif
